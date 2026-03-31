@@ -4,3 +4,7 @@ class NotFoundError(Exception):
 
 class AlreadyExistsError(Exception):
     """Exception raised when entity already exists."""
+
+
+class ForbiddenError(Exception):
+    """Exception raised когда не хватает прав."""

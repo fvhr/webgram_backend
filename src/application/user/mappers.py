@@ -1,8 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import final
 
 from src.application.user.dtos.role import RoleDTO
-from src.application.user.dtos.user import InboundUserDTO
+from src.application.user.dtos.user import InboundUserDTO, UpdateUserDTO
 from src.application.user.ports.mappers import RoleDtoEntityMapperProtocol, UserDtoEntityMapperProtocol
 from src.domain.user.entities.role import Role
 from src.domain.user.entities.user import User

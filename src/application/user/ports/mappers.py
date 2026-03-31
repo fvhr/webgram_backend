@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import Protocol
 
 from src.application.user.dtos.role import RoleDTO
-from src.application.user.dtos.user import InboundUserDTO
+from src.application.user.dtos.user import InboundUserDTO, UpdateUserDTO
 from src.domain.user.entities.role import Role
 from src.domain.user.entities.user import User
 
