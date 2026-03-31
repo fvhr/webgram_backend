@@ -65,7 +65,7 @@ class UserRepositorySQLAlchemy(UserRepositoryProtocol):
             )
             result = await self.session.execute(stmt)
             model = result.scalar_one_or_none()
-            if model:
+            if not model:
                 return None
             self.mapper.update_model_from_dto(model, user)
             await self.session.commit()
@@ -89,7 +89,7 @@ class UserRepositorySQLAlchemy(UserRepositoryProtocol):
             )
             result = await self.session.execute(stmt)
             model = result.scalar_one_or_none()
-            if model:
+            if not model:
                 return None
             self.mapper.update_password(model, new_password)
             await self.session.commit()

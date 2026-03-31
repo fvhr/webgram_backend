@@ -9,8 +9,8 @@ from src.application.user.ports.auth import AuthentificationProtocol
 class RefreshService:
     _authentication: AuthentificationProtocol
 
-    async def __call__(self) -> RefreshDTO:
-        user_uuid = self._authentication.get_user_uuid_refresh_token()
+    async def __call__(self, token: str) -> RefreshDTO:
+        user_uuid = self._authentication.get_user_uuid_by_token(token)
         if not user_uuid:
             raise ForbiddenError('Refresh token required')
         access_token = self._authentication.get_access_token(str(user_uuid))

@@ -2,7 +2,8 @@ from fastapi import FastAPI, status
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
-from src.application.common.exceptions import AlreadyExistsError, NotFoundError
+from src.application.common.exceptions import AlreadyExistsError, NotFoundError, ForbiddenError
+from src.domain.user.exceptions import ValidateError
 from src.infrastructure.db.exceptions import RepositoryError, ConflictRepositoryError
 
 
@@ -44,5 +45,25 @@ def setup_exception_handlers(app: FastAPI) -> None:
     ) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
+            content={'message': str(exc)},
+        )
+
+    @app.exception_handler(ForbiddenError)
+    async def forbidden_error_api_exception_handler(
+            request: Request,
+            exc: ForbiddenError,
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={'message': str(exc)},
+        )
+
+    @app.exception_handler(ValidateError)
+    async def value_error_api_exception_handler(
+            request: Request,
+            exc: ValidateError,
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={'message': str(exc)},
         )

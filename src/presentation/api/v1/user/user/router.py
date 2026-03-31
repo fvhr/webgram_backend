@@ -3,6 +3,7 @@ from uuid import UUID
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject
 from fastapi import APIRouter, Depends
+from fastapi.requests import Request
 
 from src.application.user.use_cases.users.change_password import ChangePasswordUseCase
 from src.application.user.use_cases.users.create_user import CreateUserUseCase
@@ -15,6 +16,7 @@ from src.presentation.api.v1.user.mappers import UserPresentationMapper
 from src.presentation.api.v1.user.schemas.responses import UserResponseSchema
 from src.presentation.api.v1.user.schemas.schema import UserSchema, UpdateUserSchema, UpdateUserPasswordSchema
 from src.presentation.api.v1.utils import require_roles
+from src.settings import Settings
 
 user_router = APIRouter(prefix='', tags=['Users'], dependencies=[Depends(require_roles(['superadmin']))])
 
@@ -95,6 +97,8 @@ async def update_user_password(
 
 @user_router.get('/users/show/me')
 @inject
-async def get_current_user(use_case: FromDishka[GetCurrentUserUseCase]):
-    user_dto = await use_case()
+async def get_current_user(request: Request, use_case: FromDishka[GetCurrentUserUseCase],
+                           settings: FromDishka[Settings]) -> UserResponseSchema:
+    token = request.cookies.get(settings.CONFIG.JWT_ACCESS_COOKIE_NAME, None)
+    user_dto = await use_case(token)
     return UserPresentationMapper.to_response(user_dto)

@@ -3,6 +3,7 @@ from dishka.integrations.fastapi import inject
 from fastapi import APIRouter
 from fastapi.params import Depends
 from fastapi.responses import Response
+from fastapi.requests import Request
 
 from src.application.user.service.login_service import LoginService
 from src.application.user.service.resfresh_service import RefreshService
@@ -41,15 +42,16 @@ async def login(login_data: LoginSchema, response: Response, service: FromDishka
 
 
 @auth_router.post('/refresh',
-                  response_model=AccessTokenResponseSchema,
-                  dependencies=[Depends(require_authorization())])
+                  response_model=AccessTokenResponseSchema, )
 @inject
 async def refresh_token(
         response: Response,
+        request: Request,
         service: FromDishka[RefreshService],
         settings: FromDishka[Settings]
 ) -> AccessTokenResponseSchema:
-    access_token_dto = await service()
+    token = request.cookies.get(settings.CONFIG.JWT_REFRESH_COOKIE_NAME, None)
+    access_token_dto = await service(token)
     response.set_cookie(
         key=settings.CONFIG.JWT_ACCESS_COOKIE_NAME,
         value=access_token_dto.access_token,
@@ -62,6 +64,7 @@ async def refresh_token(
 
 
 @auth_router.post('/logout', dependencies=[Depends(require_authorization())])
+@inject
 async def logout(response: Response, settings: FromDishka[Settings]):
     response.delete_cookie(settings.CONFIG.JWT_ACCESS_COOKIE_NAME)
     response.delete_cookie(settings.CONFIG.JWT_REFRESH_COOKIE_NAME)

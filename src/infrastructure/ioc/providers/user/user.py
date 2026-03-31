@@ -16,6 +16,7 @@ from src.application.user.use_cases.users.delete_user import DeleteUserUseCase
 from src.application.user.use_cases.users.get_current_user import GetCurrentUserUseCase
 from src.application.user.use_cases.users.get_user import GetUserUseCase
 from src.application.user.use_cases.users.get_users import GetUsersUseCase
+from src.application.user.use_cases.users.update_user import UpdateUserUseCase
 from src.domain.services.password_hash_service import PasswordHashService
 from src.infrastructure.db.user.mappers.role import RoleDBMapper
 from src.infrastructure.db.user.mappers.user import UserDBMapper
@@ -88,6 +89,15 @@ class UserUseCaseProvider(Provider):
     ) -> ChangePasswordUseCase:
         return ChangePasswordUseCase(_user_repo=user_repository,
                                      _user_view_repo=user_view)
+
+    @provide(scope=Scope.REQUEST)
+    async def update_user_use_case(
+            self,
+            user_repository: UserRepositoryProtocol,
+            user_view: ViewUserRepositoryProtocol
+    ) -> UpdateUserUseCase:
+        return UpdateUserUseCase(_user_repository=user_repository,
+                                 _user_view_repo=user_view)
 
     @provide(scope=Scope.REQUEST)
     async def get_current_user_use_case(
