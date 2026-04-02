@@ -8,9 +8,12 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from src.application.common.ports.atc_gateway import AtcGatewayProtocol
 from src.application.user.ports.auth import AuthentificationProtocol
 from src.domain.services.password_hash_service import PasswordHashService
 from src.infrastructure.auth.authentification_from_auth_x import AuthentificationAuthX
+from src.infrastructure.db.common.atc_gateway import SqlAlchemyAtcGateway
+from src.infrastructure.db.common.mappers.domain import DomainGatewayDBMapper
 from src.settings import Settings
 
 
@@ -24,6 +27,13 @@ class PasswordHashServiceProvider(Provider):
     @provide(scope=Scope.APP)
     def get_password_hash_service(self) -> PasswordHashService:
         return PasswordHashService()
+
+
+class AtcGatewayProvider(Provider):
+    @provide(scope=Scope.REQUEST)
+    def get_atc_gateway_provider(self, session: AsyncSession, db_mapper: DomainGatewayDBMapper,
+                                 settings: Settings) -> AtcGatewayProtocol:
+        return SqlAlchemyAtcGateway(session=session, settings=settings, mapper=db_mapper)
 
 
 class AuthentificationProvider(Provider):
@@ -74,4 +84,5 @@ def get_common_providers() -> list[Provider]:
         DatabaseProvider(),
         PasswordHashServiceProvider(),
         AuthentificationProvider(),
+        AtcGatewayProvider(),
     ]

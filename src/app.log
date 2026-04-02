@@ -1,0 +1,13 @@
+2026-04-02 12:58:01,476 - src.logger - CRITICAL - 2026-04-02 12:58:01.476507 Failed to retrieve domains: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "webgram_domains" does not exist
+[SQL: SELECT webgram_domains.domain_uuid, webgram_domains.domain_name, webgram_domains.domain_enabled, webgram_domains.domain_description 
+FROM webgram_domains]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-02 12:58:37,249 - src.logger - CRITICAL - 2026-04-02 12:58:37.249203 Failed to retrieve domains: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "webgram_domains" does not exist
+[SQL: SELECT webgram_domains.domain_uuid, webgram_domains.domain_name, webgram_domains.domain_enabled, webgram_domains.domain_description 
+FROM webgram_domains]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-02 12:58:56,170 - src.logger - CRITICAL - 2026-04-02 12:58:56.170755 Failed to retrieve domains: This session is provisioning a new connection; concurrent operations are not permitted (Background on this error at: https://sqlalche.me/e/20/isce)
+2026-04-02 12:59:29,759 - src.logger - CRITICAL - 2026-04-02 12:59:29.758808 Failed to retrieve domains: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "webgram_domains" does not exist
+[SQL: SELECT webgram_domains.domain_uuid, webgram_domains.domain_name, webgram_domains.domain_enabled, webgram_domains.domain_description 
+FROM webgram_domains]
+(Background on this error at: https://sqlalche.me/e/20/f405)

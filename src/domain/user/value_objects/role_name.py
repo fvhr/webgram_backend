@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from src.domain.common import ValueObject
-from src.domain.user.exceptions import ValidateError
+from src.domain.exceptions import ValidateError
 
 
 @dataclass(frozen=True)

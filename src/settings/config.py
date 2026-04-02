@@ -23,6 +23,8 @@ class Settings:
     JWT_SECRET_KEY: str = field(default_factory=lambda: env("JWT_SECRET_KEY"))
     DEVELOP_MODE: str = field(default_factory=lambda: env("DEVELOP_MODE"))
 
+    DOMAIN_ATC_TABLE_NAME: str = 'v_domains'
+
     @property
     def DATABASE_URL(self) -> str:
         return f'postgresql+asyncpg://{self.PG_USER}:{self.PG_PASS}@{self.PG_HOST}:{self.PG_PORT}/{self.PG_NAME}'

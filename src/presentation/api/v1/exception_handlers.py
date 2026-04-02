@@ -3,7 +3,7 @@ from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
 from src.application.common.exceptions import AlreadyExistsError, NotFoundError, ForbiddenError
-from src.domain.user.exceptions import ValidateError
+from src.domain.exceptions import ValidateError
 from src.infrastructure.db.exceptions import RepositoryError, ConflictRepositoryError
 
 
