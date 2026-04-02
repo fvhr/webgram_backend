@@ -15,13 +15,15 @@ from src.application.user.use_cases.users.update_user import UpdateUserUseCase
 from src.presentation.api.v1.user.mappers import UserPresentationMapper
 from src.presentation.api.v1.user.schemas.responses import UserResponseSchema
 from src.presentation.api.v1.user.schemas.schema import UserSchema, UpdateUserSchema, UpdateUserPasswordSchema
-from src.presentation.api.v1.utils import require_roles
+from src.presentation.api.v1.utils import require_roles, require_authorization
 from src.settings import Settings
 
-user_router = APIRouter(prefix='', tags=['Users'], dependencies=[Depends(require_roles(['superadmin']))])
+user_public_router = APIRouter(prefix='', tags=['Users'], dependencies=[Depends(require_authorization)])
+
+user_admin_router = APIRouter(prefix='', tags=['Users-Admin'], dependencies=[Depends(require_roles(['superadmin']))])
 
 
-@user_router.post('/users', response_model=UserResponseSchema)
+@user_admin_router.post('/users', response_model=UserResponseSchema)
 @inject
 async def create_user(
         user: UserSchema,
@@ -32,7 +34,7 @@ async def create_user(
     return UserPresentationMapper.to_response(user_dto)
 
 
-@user_router.delete('/users/{user_uuid}')
+@user_admin_router.delete('/users/{user_uuid}')
 @inject
 async def delete_user(
         user_uuid: UUID,
@@ -41,7 +43,7 @@ async def delete_user(
     return await use_case(str(user_uuid))
 
 
-@user_router.get(
+@user_admin_router.get(
     '/users',
     response_model=list[UserResponseSchema],
 )
@@ -53,7 +55,7 @@ async def get_users(use_case: FromDishka[GetUsersUseCase]) -> \
             users_dto]
 
 
-@user_router.get(
+@user_admin_router.get(
     '/users/{user_uuid}',
     response_model=UserResponseSchema,
 )
@@ -66,7 +68,7 @@ async def get_user(
     return UserPresentationMapper.to_response(user_dto)
 
 
-@user_router.put(
+@user_admin_router.put(
     '/users',
     response_model=UserResponseSchema,
 )
@@ -80,7 +82,7 @@ async def update_user(
     return UserPresentationMapper.to_response(user_dto)
 
 
-@user_router.patch(
+@user_admin_router.patch(
     '/users/{user_uuid}',
     response_model=UserResponseSchema,
 )
@@ -95,7 +97,7 @@ async def update_user_password(
     return UserPresentationMapper.to_response(user_dto)
 
 
-@user_router.get('/users/show/me')
+@user_public_router.get('/users/show/me', dependencies=[Depends(require_authorization())])
 @inject
 async def get_current_user(request: Request, use_case: FromDishka[GetCurrentUserUseCase],
                            settings: FromDishka[Settings]) -> UserResponseSchema:
