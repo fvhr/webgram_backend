@@ -6,7 +6,7 @@ from src.domain.domain.entities.domain import Domain
 
 class DomainRepositoryProtocol(Protocol):
     @abstractmethod
-    async def create_or_update_domain(self, domain: Domain) -> Domain | None:
+    async def create_or_update_domain(self, domain: Domain) -> Domain:
         raise NotImplementedError
 
     @abstractmethod

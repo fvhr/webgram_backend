@@ -5,7 +5,7 @@ from src.application.common.ports.atc_gateway import AtcGatewayProtocol
 from src.application.domain.mappers import DomainDTOMapper
 from src.application.domain.ports.mappers import DomainDtoEntityMapperProtocol
 from src.application.domain.ports.repository import DomainRepositoryProtocol
-from src.application.domain.service.start_service import SyncDomainService
+from src.application.domain.service.sync_service import SyncDomainService
 from src.infrastructure.db.common.mappers.domain import DomainGatewayDBMapper
 from src.infrastructure.db.domain.mappers.domain import DomainDBMapper
 from src.infrastructure.db.domain.repositories.domain import DomainRepositorySQLAlchemy

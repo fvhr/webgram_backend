@@ -1,7 +1,7 @@
 from dishka import AsyncContainer
 from fastapi import FastAPI
 
-from src.application.domain.service.start_service import SyncDomainService
+from src.application.domain.service.sync_service import SyncDomainService
 from src.application.user.service.add_default_role_and_user import CreateDefaultRoleAndUserService
 
 

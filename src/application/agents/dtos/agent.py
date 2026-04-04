@@ -1,0 +1,13 @@
+from dataclasses import dataclass
+from uuid import UUID
+
+from src.application.common.dto import DTO
+
+
+@dataclass(frozen=True)
+class AgentAtcDTO(DTO):
+    agent_uuid: UUID
+    agent_name: str
+    agent_number: str
+    agent_password: str
+    domain_uuid: UUID
