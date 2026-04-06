@@ -7,10 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.application.agents.dtos.agent import AgentAtcDTO
 from src.application.common.ports.atc_gateway import AtcGatewayProtocol
 from src.application.extensions.dtos.extension import ExtensionAtcDTO
+from src.application.queues.dtos.queue import QueueAtcDTO
 from src.domain.domain.entities.domain import Domain
 from src.infrastructure.db.common.mappers.agent import AgentGatewayDBMapper
 from src.infrastructure.db.common.mappers.domain import DomainGatewayDBMapper
 from src.infrastructure.db.common.mappers.extension import ExtensionGatewayDBMapper
+from src.infrastructure.db.common.mappers.queue import QueueGatewayDBMapper
 from src.infrastructure.db.exceptions import RepositoryError
 from src.logger import logger
 from src.settings import Settings
@@ -23,6 +25,7 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
     domain_mapper: DomainGatewayDBMapper
     agent_mapper: AgentGatewayDBMapper
     extension_mapper: ExtensionGatewayDBMapper
+    queue_mapper: QueueGatewayDBMapper
 
     async def get_atc_domains(self) -> list[Domain]:
         try:
@@ -63,4 +66,18 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
             logger.critical(f'Failed to retrieve atc extensions: {e}')
             raise RepositoryError(
                 f'Failed to retrieve atc extensions: {e}'
+            ) from e
+
+    async def get_atc_queues(self) -> list[QueueAtcDTO]:
+        try:
+            stmt = text(
+                f"select call_center_queue_uuid, queue_name, queue_extension, "
+                f"domain_uuid from {self.settings.QUEUE_ATC_TABLE_NAME}")
+            result = await self.session.execute(stmt)
+            queue_models = result.all()
+            return [self.queue_mapper.to_entity(queue_model) for queue_model in queue_models]
+        except SQLAlchemyError as e:
+            logger.critical(f'Failed to retrieve atc queues: {e}')
+            raise RepositoryError(
+                f'Failed to retrieve atc queues: {e}'
             ) from e

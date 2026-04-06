@@ -4,6 +4,7 @@ from .user import UserModel
 from .domain import DomainModel
 from .agent import AgentModel
 from .extension import ExtensionModel
+from .queues import QueueModel
 
 __all__ = (
     'Base',
@@ -12,4 +13,5 @@ __all__ = (
     'DomainModel',
     'AgentModel',
     'ExtensionModel',
+    'QueueModel',
 )

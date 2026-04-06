@@ -16,6 +16,7 @@ from src.infrastructure.db.common.atc_gateway import SqlAlchemyAtcGateway
 from src.infrastructure.db.common.mappers.agent import AgentGatewayDBMapper
 from src.infrastructure.db.common.mappers.domain import DomainGatewayDBMapper
 from src.infrastructure.db.common.mappers.extension import ExtensionGatewayDBMapper
+from src.infrastructure.db.common.mappers.queue import QueueGatewayDBMapper
 from src.settings import Settings
 
 
@@ -36,10 +37,11 @@ class AtcGatewayProvider(Provider):
     def get_atc_gateway_provider(self, session: AsyncSession, domain_mapper: DomainGatewayDBMapper,
                                  agent_mapper: AgentGatewayDBMapper,
                                  extension_mapper: ExtensionGatewayDBMapper,
+                                 queue_mapper: QueueGatewayDBMapper,
                                  settings: Settings) -> AtcGatewayProtocol:
         return SqlAlchemyAtcGateway(session=session, settings=settings,
                                     domain_mapper=domain_mapper, agent_mapper=agent_mapper,
-                                    extension_mapper=extension_mapper)
+                                    extension_mapper=extension_mapper, queue_mapper=queue_mapper)
 
 
 class AuthentificationProvider(Provider):

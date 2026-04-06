@@ -26,6 +26,7 @@ class Settings:
     DOMAIN_ATC_TABLE_NAME: str = 'v_domains'
     AGENT_ATC_TABLE_NAME: str = 'v_call_center_agents'
     EXTENSION_ATC_TABLE_NAME: str = 'v_extensions'
+    QUEUE_ATC_TABLE_NAME: str = 'v_call_center_queues'
 
     @property
     def DATABASE_URL(self) -> str:
