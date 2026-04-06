@@ -11,3 +11,32 @@ FROM webgram_domains]
 [SQL: SELECT webgram_domains.domain_uuid, webgram_domains.domain_name, webgram_domains.domain_enabled, webgram_domains.domain_description 
 FROM webgram_domains]
 (Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-06 17:19:34,553 - src.logger - CRITICAL - 2026-04-06 17:19:34.552783 Failed to retrieve agents: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "webgram_agents" does not exist
+[SQL: SELECT webgram_agents.agent_uuid, webgram_agents.agent_name, webgram_agents.agent_number, webgram_agents.agent_password, webgram_agents.domain_uuid, webgram_agents.user_uuid, webgram_agents.agent_status 
+FROM webgram_agents]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-06 17:20:30,984 - src.logger - CRITICAL - 2026-04-06 17:20:30.983856 Failed to retrieve atc agents: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column "agent_uuid" does not exist
+HINT:  Perhaps you meant to reference the column "v_call_center_agents.agent_id".
+[SQL: select agent_uuid, agent_name, agent_number, agent_password, domain_uuid from v_call_center_agents]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-06 17:20:57,397 - src.logger - CRITICAL - 2026-04-06 17:20:57.397079 Failed to retrieve atc agents: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column "agent_number" does not exist
+HINT:  Perhaps you meant to reference the column "v_call_center_agents.agent_name".
+[SQL: select call_center_agent_uuid, agent_name, agent_number, agent_password, domain_uuid from v_call_center_agents]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-06 17:21:34,677 - src.logger - CRITICAL - 2026-04-06 17:21:34.677391 Failed to retrieve atc agents: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column "agent_extension" does not exist
+[SQL: select call_center_agent_uuid, agent_name, agent_extension, agent_password, domain_uuid from v_call_center_agents]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-06 17:22:20,930 - src.logger - CRITICAL - 2026-04-06 17:22:20.930409 Conflict while saving or update agent 'c39f01be-9479-436f-8dd8-bc15af77e2a1': (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.NotNullViolationError'>: null value in column "user_uuid" of relation "webgram_agents" violates not-null constraint
+DETAIL:  Failing row contains (c39f01be-9479-436f-8dd8-bc15af77e2a1, Черненко Дмитрий Анатольевич, 167512, 167512, 00d95071-b9fb-4ba3-aa38-04dbced4568f, null, Logged Out).
+[SQL: INSERT INTO webgram_agents (agent_uuid, agent_name, agent_number, agent_password, domain_uuid, user_uuid, agent_status) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::UUID, $6::UUID, $7::VARCHAR)]
+[parameters: (UUID('c39f01be-9479-436f-8dd8-bc15af77e2a1'), 'Черненко Дмитрий Анатольевич', '167512', '167512', UUID('00d95071-b9fb-4ba3-aa38-04dbced4568f'), None, 'Logged Out')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2026-04-06 17:23:37,709 - src.logger - CRITICAL - 2026-04-06 17:23:37.708038 Conflict while saving or update agent '7bece4a2-1094-4091-853d-36ada6da080a': (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.NotNullViolationError'>: null value in column "agent_password" of relation "webgram_agents" violates not-null constraint
+DETAIL:  Failing row contains (7bece4a2-1094-4091-853d-36ada6da080a, Зыкин Леонид Витальевич, 167504, null, 00d95071-b9fb-4ba3-aa38-04dbced4568f, null, Logged Out).
+[SQL: INSERT INTO webgram_agents (agent_uuid, agent_name, agent_number, agent_password, domain_uuid, user_uuid, agent_status) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::UUID, $6::UUID, $7::VARCHAR)]
+[parameters: (UUID('7bece4a2-1094-4091-853d-36ada6da080a'), 'Зыкин Леонид Витальевич', '167504', None, UUID('00d95071-b9fb-4ba3-aa38-04dbced4568f'), None, 'Logged Out')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2026-04-06 19:16:59,821 - src.logger - CRITICAL - 2026-04-06 19:16:59.821523 Failed to retrieve extensions: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "webgram_extensions" does not exist
+[SQL: SELECT webgram_extensions.extension_uuid, webgram_extensions.extension_number, webgram_extensions.extension_password, webgram_extensions.caller_id_name, webgram_extensions.caller_id_number, webgram_extensions.domain_uuid 
+FROM webgram_extensions]
+(Background on this error at: https://sqlalche.me/e/20/f405)

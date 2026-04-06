@@ -6,8 +6,8 @@ from src.domain.exceptions import ValidateError
 
 @dataclass(frozen=True)
 class CallerIdNumber(ValueObject[str]):
-    value: str
+    value: str | None
 
     def _validate(self) -> None:
-        if not self.value.isdigit():
+        if self.value and not self.value.isdigit():
             raise ValidateError('caller id number must has digit only')

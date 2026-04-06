@@ -6,7 +6,7 @@ from src.domain.extensions.entities.extension import Extension
 
 class ExtensionRepositoryProtocol(Protocol):
     @abstractmethod
-    async def create_or_update_extension(self, extension: Extension) -> Extension:
+    async def create_or_update_all_extensions(self, extensions: list[Extension]) -> list[Extension]:
         raise NotImplementedError
 
     @abstractmethod

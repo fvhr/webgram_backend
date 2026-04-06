@@ -13,7 +13,9 @@ from src.application.user.ports.auth import AuthentificationProtocol
 from src.domain.services.password_hash_service import PasswordHashService
 from src.infrastructure.auth.authentification_from_auth_x import AuthentificationAuthX
 from src.infrastructure.db.common.atc_gateway import SqlAlchemyAtcGateway
+from src.infrastructure.db.common.mappers.agent import AgentGatewayDBMapper
 from src.infrastructure.db.common.mappers.domain import DomainGatewayDBMapper
+from src.infrastructure.db.common.mappers.extension import ExtensionGatewayDBMapper
 from src.settings import Settings
 
 
@@ -31,9 +33,13 @@ class PasswordHashServiceProvider(Provider):
 
 class AtcGatewayProvider(Provider):
     @provide(scope=Scope.REQUEST)
-    def get_atc_gateway_provider(self, session: AsyncSession, db_mapper: DomainGatewayDBMapper,
+    def get_atc_gateway_provider(self, session: AsyncSession, domain_mapper: DomainGatewayDBMapper,
+                                 agent_mapper: AgentGatewayDBMapper,
+                                 extension_mapper: ExtensionGatewayDBMapper,
                                  settings: Settings) -> AtcGatewayProtocol:
-        return SqlAlchemyAtcGateway(session=session, settings=settings, mapper=db_mapper)
+        return SqlAlchemyAtcGateway(session=session, settings=settings,
+                                    domain_mapper=domain_mapper, agent_mapper=agent_mapper,
+                                    extension_mapper=extension_mapper)
 
 
 class AuthentificationProvider(Provider):

@@ -9,7 +9,7 @@ from src.domain.extensions.value_objects.extension_number import ExtensionNumber
 class Extension:
     extension_uuid: UUID
     extension_number: ExtensionNumber
-    extension_password: str
-    caller_id_name: str
+    extension_password: str | None
+    caller_id_name: str | None
     caller_id_number: CallerIdNumber
     domain_uuid: UUID

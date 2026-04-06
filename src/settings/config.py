@@ -24,6 +24,8 @@ class Settings:
     DEVELOP_MODE: str = field(default_factory=lambda: env("DEVELOP_MODE"))
 
     DOMAIN_ATC_TABLE_NAME: str = 'v_domains'
+    AGENT_ATC_TABLE_NAME: str = 'v_call_center_agents'
+    EXTENSION_ATC_TABLE_NAME: str = 'v_extensions'
 
     @property
     def DATABASE_URL(self) -> str:

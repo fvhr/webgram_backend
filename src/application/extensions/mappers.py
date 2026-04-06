@@ -1,21 +1,23 @@
 from dataclasses import dataclass
 from typing import final
 
-from src.application.agents.dtos.agent import AgentAtcDTO
-from src.application.agents.ports.mappers import AgentDtoEntityMapperProtocol
-from src.domain.agents.entities.agent import Agent
-from src.domain.agents.value_objects.agent_number import AgentNumber
+from src.application.extensions.dtos.extension import ExtensionAtcDTO
+from src.application.extensions.ports.mapper import ExtensionDtoEntityMapperProtocol
+from src.domain.extensions.entities.extension import Extension
+from src.domain.extensions.value_objects.caller_id_number import CallerIdNumber
+from src.domain.extensions.value_objects.extension_number import ExtensionNumber
 
 
 @final
 @dataclass(frozen=True, slots=True)
-class AgentDTOMapper(AgentDtoEntityMapperProtocol):
+class ExtensionDTOMapper(ExtensionDtoEntityMapperProtocol):
 
-    def to_entity(self, dto: AgentAtcDTO) -> Agent:
-        return Agent(
-            agent_uuid=dto.agent_uuid,
-            agent_name=dto.agent_name,
-            agent_number=AgentNumber(dto.agent_number),
-            agent_password=dto.agent_password,
-            domain_uuid=dto.domain_uuid
+    def to_entity(self, dto: ExtensionAtcDTO) -> Extension:
+        return Extension(
+            extension_uuid=dto.extension_uuid,
+            extension_number=ExtensionNumber(dto.extension_number),
+            extension_password=dto.extension_password,
+            caller_id_name=dto.caller_id_name,
+            caller_id_number=CallerIdNumber(dto.caller_id_number),
+            domain_uuid=dto.domain_uuid,
         )

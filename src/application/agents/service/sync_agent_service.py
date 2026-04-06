@@ -15,9 +15,7 @@ class SyncAgentService:
     async def __call__(self) -> None:
         now_agents = await self._agent_repository.get_agents()
         update_agents = await self._atc_gateway.get_atc_agents()
-        for dto in update_agents:
-            entity = self._agent_mapper.to_entity(dto)
-            await self._agent_repository.create_or_update_agent(entity)
+        await self._agent_repository.create_or_update_all_agents([self._agent_mapper.to_entity(dto) for dto in update_agents])
 
         delete_uuids_set = set([entity.agent_uuid for entity in now_agents]) - set(
             [dto.agent_uuid for dto in update_agents])

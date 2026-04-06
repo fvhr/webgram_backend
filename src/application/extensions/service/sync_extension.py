@@ -15,10 +15,8 @@ class SyncExtensionService:
     async def __call__(self) -> None:
         now_extensions = await self._extension_repository.get_extensions()
         update_extensions = await self._atc_gateway.get_atc_extensions()
-        for dto in update_extensions:
-            entity = self._extension_mapper.to_entity(dto)
-            await self._extension_repository.create_or_update_extension(entity)
-
+        await self._extension_repository.create_or_update_all_extensions(
+            [self._extension_mapper.to_entity(dto) for dto in update_extensions])
         delete_uuids_set = set([entity.extension_uuid for entity in now_extensions]) - set(
             [dto.extension_uuid for dto in update_extensions])
 

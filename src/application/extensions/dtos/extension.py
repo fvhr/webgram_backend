@@ -8,7 +8,7 @@ from src.application.common.dto import DTO
 class ExtensionAtcDTO(DTO):
     extension_uuid: UUID
     extension_number: str
-    extension_password: str
-    caller_id_name: str
-    caller_id_number: str
+    extension_password: str | None
+    caller_id_name: str | None
+    caller_id_number: str | None
     domain_uuid: UUID

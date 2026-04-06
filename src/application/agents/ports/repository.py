@@ -6,7 +6,7 @@ from src.domain.agents.entities.agent import Agent
 
 class AgentRepositoryProtocol(Protocol):
     @abstractmethod
-    async def create_or_update_agent(self, agent: Agent) -> Agent:
+    async def create_or_update_all_agents(self, agents: list[Agent]) -> list[Agent]:
         raise NotImplementedError
 
     @abstractmethod

@@ -30,8 +30,8 @@ class DomainRepositorySQLAlchemy(DomainRepositoryProtocol):
             if domain_model:
                 self.mapper.update_model_from_entity(domain_model, domain)
             else:
-                acl_node_model = self.mapper.to_model(domain)
-                self.session.add(acl_node_model)
+                domain_model = self.mapper.to_model(domain)
+                self.session.add(domain_model)
             await self.session.commit()
             return domain
         except IntegrityError as e:

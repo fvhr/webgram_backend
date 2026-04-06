@@ -8,6 +8,6 @@ from src.application.common.dto import DTO
 class AgentAtcDTO(DTO):
     agent_uuid: UUID
     agent_name: str
-    agent_number: str
+    agent_number: str | None
     agent_password: str
     domain_uuid: UUID
