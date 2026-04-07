@@ -44,7 +44,7 @@ class DomainServiceProvider(Provider):
 
 
 class DomainEventHandlersProvider(Provider):
-    @provide(scope=Scope.APP)
+    @provide(scope=Scope.REQUEST)
     async def domain_heartbeat_event_handler(
             self,
             sync_domain_service: SyncDomainService,

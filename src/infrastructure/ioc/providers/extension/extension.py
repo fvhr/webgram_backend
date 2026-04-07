@@ -2,6 +2,7 @@ from dishka import Provider, Scope, provide
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.application.common.ports.external import AtcGatewayProtocol
+from src.application.extensions.event_handlers.heartbeat import ExtensionHeartbeatEventHandler
 from src.application.extensions.mappers import ExtensionDTOMapper
 from src.application.extensions.ports.mapper import ExtensionDtoEntityMapperProtocol
 from src.application.extensions.ports.repository import ExtensionRepositoryProtocol
@@ -44,9 +45,19 @@ class ExtensionServiceProvider(Provider):
                                     _extension_mapper=extension_mapper)
 
 
+class ExtensionEventHandlersProvider(Provider):
+    @provide(scope=Scope.REQUEST)
+    async def extension_heartbeat_event_handler(
+            self,
+            sync_extension_service: SyncExtensionService,
+    ) -> ExtensionHeartbeatEventHandler:
+        return ExtensionHeartbeatEventHandler(_extension_sync_service=sync_extension_service)
+
+
 def get_extension_providers() -> list[Provider]:
     return [
         ExtensionRepositoryProvider(),
         ExtensionMapperProvider(),
         ExtensionServiceProvider(),
+        ExtensionEventHandlersProvider(),
     ]
