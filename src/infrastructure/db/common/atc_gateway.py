@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.application.agents.dtos.agent import AgentAtcDTO
-from src.application.common.ports.atc_gateway import AtcGatewayProtocol
+from src.application.common.ports.external import AtcGatewayProtocol
 from src.application.extensions.dtos.extension import ExtensionAtcDTO
 from src.application.queues.dtos.queue import QueueAtcDTO
 from src.domain.domain.entities.domain import Domain

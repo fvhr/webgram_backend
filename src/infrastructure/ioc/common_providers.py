@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from src.application.common.ports.atc_gateway import AtcGatewayProtocol
+from src.application.common.ports.external import AtcGatewayProtocol
 from src.application.user.ports.auth import AuthentificationProtocol
 from src.domain.services.password_hash_service import PasswordHashService
 from src.infrastructure.auth.authentification_from_auth_x import AuthentificationAuthX

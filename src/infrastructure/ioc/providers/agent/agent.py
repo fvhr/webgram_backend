@@ -5,7 +5,7 @@ from src.application.agents.mappers import AgentDTOMapper
 from src.application.agents.ports.mappers import AgentDtoEntityMapperProtocol
 from src.application.agents.ports.repository import AgentRepositoryProtocol
 from src.application.agents.service.sync_agent_service import SyncAgentService
-from src.application.common.ports.atc_gateway import AtcGatewayProtocol
+from src.application.common.ports.external import AtcGatewayProtocol
 from src.infrastructure.db.agent.mappers.agent import AgentDBMapper
 from src.infrastructure.db.agent.repositories.agent import AgentRepositorySQLAlchemy
 from src.infrastructure.db.common.mappers.agent import AgentGatewayDBMapper

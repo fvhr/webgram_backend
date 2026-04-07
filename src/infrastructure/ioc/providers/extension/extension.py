@@ -1,7 +1,7 @@
 from dishka import Provider, Scope, provide
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.application.common.ports.atc_gateway import AtcGatewayProtocol
+from src.application.common.ports.external import AtcGatewayProtocol
 from src.application.extensions.mappers import ExtensionDTOMapper
 from src.application.extensions.ports.mapper import ExtensionDtoEntityMapperProtocol
 from src.application.extensions.ports.repository import ExtensionRepositoryProtocol

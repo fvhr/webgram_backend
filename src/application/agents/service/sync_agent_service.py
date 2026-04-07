@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from src.application.agents.ports.mappers import AgentDtoEntityMapperProtocol
 from src.application.agents.ports.repository import AgentRepositoryProtocol
-from src.application.common.ports.atc_gateway import AtcGatewayProtocol
+from src.application.common.ports.external import AtcGatewayProtocol
 from src.logger import logger
 
 

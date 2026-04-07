@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.application.common.ports.atc_gateway import AtcGatewayProtocol
+from src.application.common.ports.external import AtcGatewayProtocol
 from src.application.queues.ports.mappers import QueueDtoEntityMapperProtocol
 from src.application.queues.ports.repository import QueueRepositoryProtocol
 from src.logger import logger

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.application.common.ports.atc_gateway import AtcGatewayProtocol
+from src.application.common.ports.external import AtcGatewayProtocol
 from src.application.extensions.ports.mapper import ExtensionDtoEntityMapperProtocol
 from src.application.extensions.ports.repository import ExtensionRepositoryProtocol
 from src.logger import logger
