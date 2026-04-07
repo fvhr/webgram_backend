@@ -9,3 +9,4 @@ uvicorn==0.32.1
 passlib==1.7.4
 bcrypt==4.3.0
 authx==1.5.2
+genesis==2026.1.25

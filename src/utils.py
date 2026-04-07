@@ -6,6 +6,7 @@ from src.application.domain.service.sync_service import SyncDomainService
 from src.application.extensions.service.sync_extension import SyncExtensionService
 from src.application.queues.service.sync_queue_service import SyncQueueService
 from src.application.user.service.add_default_role_and_user import CreateDefaultRoleAndUserService
+from src.infrastructure.fs_events.fs_events import FreeSwitchEventListen
 
 
 async def start_default_functions(_app: FastAPI) -> None:
@@ -21,3 +22,5 @@ async def start_default_functions(_app: FastAPI) -> None:
         await sync_extension_service()
         sync_queue_service = await request_container.get(SyncQueueService)
         await sync_queue_service()
+        freeswitch_events = await request_container.get(FreeSwitchEventListen)
+        await freeswitch_events()

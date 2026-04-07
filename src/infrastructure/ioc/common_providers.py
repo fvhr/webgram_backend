@@ -9,6 +9,8 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from src.application.common.ports.external import AtcGatewayProtocol
+from src.application.common.service.collect_handlers_service import CollectHandlersService
+from src.application.domain.event_handlers.heartbeat import DomainHeartbeatEventHandler
 from src.application.user.ports.auth import AuthentificationProtocol
 from src.domain.services.password_hash_service import PasswordHashService
 from src.infrastructure.auth.authentification_from_auth_x import AuthentificationAuthX
@@ -17,6 +19,7 @@ from src.infrastructure.db.common.mappers.agent import AgentGatewayDBMapper
 from src.infrastructure.db.common.mappers.domain import DomainGatewayDBMapper
 from src.infrastructure.db.common.mappers.extension import ExtensionGatewayDBMapper
 from src.infrastructure.db.common.mappers.queue import QueueGatewayDBMapper
+from src.infrastructure.fs_events.fs_events import FreeSwitchEventListen
 from src.settings import Settings
 
 
@@ -48,6 +51,18 @@ class AuthentificationProvider(Provider):
     @provide(scope=Scope.APP)
     def get_authentification(self, settings: Settings) -> AuthentificationProtocol:
         return AuthentificationAuthX(_settings=settings)
+
+
+class FreeswitchEventsProvider(Provider):
+    @provide(scope=Scope.APP)
+    def get_collect_handlers_service(self,
+                                     domain_heartbeat_handler: DomainHeartbeatEventHandler) -> CollectHandlersService:
+        return CollectHandlersService(_domain_heartbeat_handler=domain_heartbeat_handler)
+
+    @provide(scope=Scope.APP)
+    def freeswitch_events(self, settings: Settings,
+                          collect_handlers_service: CollectHandlersService) -> FreeSwitchEventListen:
+        return FreeSwitchEventListen(settings=settings, collect_handlers_service=collect_handlers_service)
 
 
 class DatabaseProvider(Provider):
@@ -93,4 +108,5 @@ def get_common_providers() -> list[Provider]:
         PasswordHashServiceProvider(),
         AuthentificationProvider(),
         AtcGatewayProvider(),
+        FreeswitchEventsProvider(),
     ]

@@ -2,6 +2,7 @@ from dishka import Provider, Scope, provide
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.application.common.ports.external import AtcGatewayProtocol
+from src.application.domain.event_handlers.heartbeat import DomainHeartbeatEventHandler
 from src.application.domain.mappers import DomainDTOMapper
 from src.application.domain.ports.mappers import DomainDtoEntityMapperProtocol
 from src.application.domain.ports.repository import DomainRepositoryProtocol
@@ -42,9 +43,19 @@ class DomainServiceProvider(Provider):
         return SyncDomainService(_domain_repository=domain_repository, _atc_gateway=atc_gateway)
 
 
+class DomainEventHandlersProvider(Provider):
+    @provide(scope=Scope.APP)
+    async def domain_heartbeat_event_handler(
+            self,
+            sync_domain_service: SyncDomainService,
+    ) -> DomainHeartbeatEventHandler:
+        return DomainHeartbeatEventHandler(_domain_sync_service=sync_domain_service)
+
+
 def get_domain_providers() -> list[Provider]:
     return [
         DomainRepositoryProvider(),
         DomainMapperProvider(),
         DomainServiceProvider(),
+        DomainEventHandlersProvider()
     ]

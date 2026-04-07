@@ -20,6 +20,10 @@ class Settings:
     DEFAULT_ADMIN_NAME: str = field(default_factory=lambda: env('DEFAULT_ADMIN_NAME'))
     DEFAULT_ADMIN_PASSWORD: str = field(default_factory=lambda: env('DEFAULT_ADMIN_PASSWORD'))
 
+    FS_HOST: str = field(default_factory=lambda: env('FS_HOST'))
+    FS_PORT: int = field(default_factory=lambda: env('FS_PORT'))
+    FS_PASSWORD: str = field(default_factory=lambda: env('FS_PASSWORD'))
+
     JWT_SECRET_KEY: str = field(default_factory=lambda: env("JWT_SECRET_KEY"))
     DEVELOP_MODE: str = field(default_factory=lambda: env("DEVELOP_MODE"))
 

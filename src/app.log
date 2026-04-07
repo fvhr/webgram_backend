@@ -40,3 +40,9 @@ DETAIL:  Failing row contains (7bece4a2-1094-4091-853d-36ada6da080a, Зыкин Леони
 [SQL: SELECT webgram_extensions.extension_uuid, webgram_extensions.extension_number, webgram_extensions.extension_password, webgram_extensions.caller_id_name, webgram_extensions.caller_id_number, webgram_extensions.domain_uuid 
 FROM webgram_extensions]
 (Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-07 15:04:28,916 - src.logger - CRITICAL - 2026-04-07 15:04:28.915815 C:\Users\RomanTkachenko\PycharmProjects\webgram_backend\src\infrastructure\fs_events\fs_events.py:34 - name 'gevent' is not defined
+2026-04-07 15:04:33,961 - src.logger - CRITICAL - 2026-04-07 15:04:33.961790 C:\Users\RomanTkachenko\PycharmProjects\webgram_backend\src\infrastructure\fs_events\fs_events.py:34 - name 'gevent' is not defined
+2026-04-07 15:04:39,008 - src.logger - CRITICAL - 2026-04-07 15:04:39.008067 C:\Users\RomanTkachenko\PycharmProjects\webgram_backend\src\infrastructure\fs_events\fs_events.py:34 - name 'gevent' is not defined
+2026-04-07 15:04:44,066 - src.logger - CRITICAL - 2026-04-07 15:04:44.066524 C:\Users\RomanTkachenko\PycharmProjects\webgram_backend\src\infrastructure\fs_events\fs_events.py:34 - name 'gevent' is not defined
+2026-04-07 15:04:49,106 - src.logger - CRITICAL - 2026-04-07 15:04:49.106017 C:\Users\RomanTkachenko\PycharmProjects\webgram_backend\src\infrastructure\fs_events\fs_events.py:34 - name 'gevent' is not defined
+2026-04-07 15:04:54,154 - src.logger - CRITICAL - 2026-04-07 15:04:54.153869 C:\Users\RomanTkachenko\PycharmProjects\webgram_backend\src\infrastructure\fs_events\fs_events.py:34 - name 'gevent' is not defined
