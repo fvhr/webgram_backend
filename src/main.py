@@ -11,6 +11,7 @@ from src.infrastructure.ioc.di import get_providers
 from src.logger import logger
 from src.presentation.api.v1.exception_handlers import setup_exception_handlers
 from src.presentation.api.v1.routers import api_router
+from src.presentation.api.v1.websocket.router import ws_router
 from src.utils import start_default_functions
 
 
@@ -48,6 +49,7 @@ def create_app() -> FastAPI:
 
     setup_exception_handlers(app)
     app.include_router(api_router)
+    app.include_router(ws_router)
 
     return app
 

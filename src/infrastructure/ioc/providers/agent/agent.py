@@ -1,11 +1,13 @@
 from dishka import Provider, Scope, provide
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.application.agents.event_handlers.status_change import AgentStatusChangeEventHandler
 from src.application.agents.mappers import AgentDTOMapper
 from src.application.agents.ports.mappers import AgentDtoEntityMapperProtocol
 from src.application.agents.ports.repository import AgentRepositoryProtocol
 from src.application.agents.service.sync_agent_service import SyncAgentService
-from src.application.common.ports.external import AtcGatewayProtocol
+from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol
+from src.application.common.ports.mapper import EventDtoEntityMapperProtocol
 from src.infrastructure.db.agent.mappers.agent import AgentDBMapper
 from src.infrastructure.db.agent.repositories.agent import AgentRepositorySQLAlchemy
 from src.infrastructure.db.common.mappers.agent import AgentGatewayDBMapper
@@ -40,7 +42,21 @@ class AgentServiceProvider(Provider):
             atc_gateway: AtcGatewayProtocol,
             agent_mapper: AgentDtoEntityMapperProtocol,
     ) -> SyncAgentService:
-        return SyncAgentService(_agent_repository=agent_repository, _atc_gateway=atc_gateway, _agent_mapper=agent_mapper)
+        return SyncAgentService(_agent_repository=agent_repository, _atc_gateway=atc_gateway,
+                                _agent_mapper=agent_mapper)
+
+
+class AgentEventHandlersProvider(Provider):
+    @provide(scope=Scope.REQUEST)
+    async def agent_status_change_event_handler(
+            self,
+            agent_repository: AgentRepositoryProtocol,
+            event_mapper: EventDtoEntityMapperProtocol,
+            ws_manager: WebSocketManagerProtocol,
+            agent_mapper: AgentDtoEntityMapperProtocol,
+    ) -> AgentStatusChangeEventHandler:
+        return AgentStatusChangeEventHandler(_agent_repository=agent_repository, _event_mapper=event_mapper,
+                                             _ws_manager=ws_manager, _agent_mapper=agent_mapper)
 
 
 def get_agent_providers() -> list[Provider]:
@@ -48,4 +64,5 @@ def get_agent_providers() -> list[Provider]:
         AgentRepositoryProvider(),
         AgentMapperProvider(),
         AgentServiceProvider(),
+        AgentEventHandlersProvider(),
     ]

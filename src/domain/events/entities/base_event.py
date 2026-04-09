@@ -5,6 +5,7 @@ from enum import StrEnum
 
 class EventTypes(StrEnum):
     HEARTBEAT = 'HEARTBEAT'
+    CUSTOM = 'CUSTOM'
 
 
 @dataclass

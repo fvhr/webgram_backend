@@ -8,7 +8,10 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from src.application.common.ports.external import AtcGatewayProtocol
+from src.application.agents.event_handlers.status_change import AgentStatusChangeEventHandler
+from src.application.common.mappers import EventDTOMapper
+from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol
+from src.application.common.ports.mapper import EventDtoEntityMapperProtocol
 from src.application.common.service.collect_handlers_service import CollectHandlersService
 from src.application.domain.event_handlers.heartbeat import DomainHeartbeatEventHandler
 from src.application.extensions.event_handlers.heartbeat import ExtensionHeartbeatEventHandler
@@ -23,6 +26,8 @@ from src.infrastructure.db.common.mappers.extension import ExtensionGatewayDBMap
 from src.infrastructure.db.common.mappers.queue import QueueGatewayDBMapper
 from src.infrastructure.fs_events.fs_events import FreeSwitchEventListen
 from src.infrastructure.fs_events.mappers import EventMapper
+from src.infrastructure.websocket.ws_manager import WebSocketManager
+from src.presentation.api.v1.websocket.connection_manager import ConnectionManager
 from src.settings import Settings
 
 
@@ -62,14 +67,20 @@ class FreeswitchEventsProvider(Provider):
                                      domain_heartbeat_handler: DomainHeartbeatEventHandler,
                                      extension_heartbeat_handler: ExtensionHeartbeatEventHandler,
                                      queue_heartbeat_handler: QueueHeartbeatEventHandler,
+                                     agent_status_change_handler: AgentStatusChangeEventHandler,
                                      ) -> CollectHandlersService:
         return CollectHandlersService(_domain_heartbeat_handler=domain_heartbeat_handler,
                                       _extension_heartbeat_handler=extension_heartbeat_handler,
-                                      _queue_heartbeat_handler=queue_heartbeat_handler)
+                                      _queue_heartbeat_handler=queue_heartbeat_handler,
+                                      _agent_status_change_handler=agent_status_change_handler)
 
     @provide(scope=Scope.APP)
     def event_mapper(self) -> EventMapper:
         return EventMapper()
+
+    @provide(scope=Scope.APP)
+    def event_dto_mapper(self) -> EventDtoEntityMapperProtocol:
+        return EventDTOMapper()
 
     @provide(scope=Scope.REQUEST)
     def freeswitch_events(self, settings: Settings,
@@ -116,6 +127,16 @@ class DatabaseProvider(Provider):
             yield session
 
 
+class WebSocketProvider(Provider):
+    @provide(scope=Scope.APP)
+    def get_connection_manager(self) -> ConnectionManager:
+        return ConnectionManager()
+
+    @provide(scope=Scope.APP)
+    def get_websocket_manager(self, connection_manager: ConnectionManager) -> WebSocketManagerProtocol:
+        return WebSocketManager(_connection_manager=connection_manager)
+
+
 def get_common_providers() -> list[Provider]:
     return [
         SettingsProvider(),
@@ -124,4 +145,5 @@ def get_common_providers() -> list[Provider]:
         AuthentificationProvider(),
         AtcGatewayProvider(),
         FreeswitchEventsProvider(),
+        WebSocketProvider(),
     ]

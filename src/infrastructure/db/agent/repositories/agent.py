@@ -77,3 +77,30 @@ class AgentRepositorySQLAlchemy(AgentRepositoryProtocol):
         except SQLAlchemyError as e:
             logger.critical(f'Failed to retrieve agents: {e}')
             raise RepositoryError(f'Failed to retrieve agents: {e}') from e
+
+    async def change_status_agent(self, agent_uuid: str, new_status: str) -> Agent:
+        try:
+            stmt = select(AgentModel).where(
+                AgentModel.agent_uuid
+                == agent_uuid
+            )
+            result = await self.session.execute(stmt)
+            agent_model = result.scalar_one_or_none()
+            if agent_model:
+                agent_model.agent_status = new_status
+            await self.session.commit()
+            return self.mapper.to_entity(agent_model)
+        except IntegrityError as e:
+            logger.critical(
+                f"Conflict while saving new agent status: {e}"
+            )
+            raise ConflictRepositoryError(
+                f"Conflict while saving new agent status: {e}"
+            ) from e
+        except SQLAlchemyError as e:
+            logger.critical(
+                f"Failed to save new agent status: {e}"
+            )
+            raise RepositoryError(
+                f"Failed to save new agent status: {e}"
+            ) from e

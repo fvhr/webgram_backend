@@ -20,10 +20,8 @@ class FreeSwitchEventListen:
     async def __call__(self):
         while self.reconnect_count != 0:
             async with Inbound(self.settings.FS_HOST, int(self.settings.FS_PORT), self.settings.FS_PASSWORD) as client:
-                unique_events = set([handler.get_event_name for handler in self.collect_handlers_service.get_handlers])
-                for event_name in unique_events:
-                    client.on(event_name, self.mapping_event)
-                    await client.send(f'EVENTS PLAIN {event_name}')
+                client.on('*', self.mapping_event)
+                await client.send(f'EVENTS PLAIN ALL')
                 while client.is_connected:
                     await asyncio.sleep(1)
             self.reconnect_count -= 1
@@ -32,9 +30,12 @@ class FreeSwitchEventListen:
     async def mapping_event(self, event: ESLEvent):
         event_dto = self.mapper.to_dto(event)
         event_name = event_dto.headers.get('Event-Name')
+        unique_events = set([handler.get_event_name for handler in self.collect_handlers_service.get_handlers])
+        if event_name not in unique_events:
+            return
         logger.debug(f'Получено событие: {event_name}')
         if event_name in self.get_handlers:
-            handlers = self.get_handlers.get(event_name)
+            handlers = self.get_handlers.get(str(event_name))
             for handler in handlers:
                 await handler(event_dto)
 

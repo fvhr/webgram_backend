@@ -5,6 +5,7 @@ from src.application.agents.dtos.agent import AgentAtcDTO
 from src.application.extensions.dtos.extension import ExtensionAtcDTO
 from src.application.queues.dtos.queue import QueueAtcDTO
 from src.domain.domain.entities.domain import Domain
+from src.domain.enums import WebsocketMessageTypes
 
 
 class AtcGatewayProtocol(Protocol):
@@ -22,4 +23,10 @@ class AtcGatewayProtocol(Protocol):
 
     @abstractmethod
     async def get_atc_queues(self) -> list[QueueAtcDTO]:
+        raise NotImplementedError
+
+
+class WebSocketManagerProtocol(Protocol):
+    @abstractmethod
+    async def broadcast_message(self, type_message: WebsocketMessageTypes, data: dict) -> None:
         raise NotImplementedError

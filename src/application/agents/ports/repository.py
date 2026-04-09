@@ -16,3 +16,7 @@ class AgentRepositoryProtocol(Protocol):
     @abstractmethod
     async def get_agents(self) -> list[Agent]:
         raise NotImplementedError
+
+    @abstractmethod
+    async def change_status_agent(self, agent_uuid: str, new_status: str) -> Agent:
+        raise NotImplementedError
