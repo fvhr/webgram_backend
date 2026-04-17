@@ -16,7 +16,6 @@ class AgentStatusChangeEventHandler(EventHandler):
     _agent_mapper: AgentDtoEntityMapperProtocol
     _event_mapper: EventDtoEntityMapperProtocol
     _ws_manager: WebSocketManagerProtocol
-    _heartbeat_count: int = 0
 
     async def __call__(self, event: EventDTO):
         custom_event = self._event_mapper.to_entity_custom(event)
