@@ -2,7 +2,7 @@ from fastapi import FastAPI, status
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
-from src.application.common.exceptions import AlreadyExistsError, NotFoundError, ForbiddenError
+from src.application.common.exceptions import AlreadyExistsError, NotFoundError, ForbiddenError, FSAPIError
 from src.domain.exceptions import ValidateError
 from src.infrastructure.db.exceptions import RepositoryError, ConflictRepositoryError
 
@@ -65,5 +65,15 @@ def setup_exception_handlers(app: FastAPI) -> None:
     ) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content={'message': str(exc)},
+        )
+
+    @app.exception_handler(FSAPIError)
+    async def repository_error_api_exception_handler(
+            request: Request,
+            exc: FSAPIError,
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={'message': str(exc)},
         )

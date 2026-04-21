@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
+from src.application.agents.dtos.agent import AgentDTO
 from src.application.common.dto import DTO
 from src.application.user.dtos.role import RoleDTO
 
@@ -31,6 +32,7 @@ class OutboundUserDTO(DTO):
     user_uuid: UUID
     user_name: str
     role: RoleDTO
+    agent: AgentDTO | None
 
 
 @dataclass(frozen=True)

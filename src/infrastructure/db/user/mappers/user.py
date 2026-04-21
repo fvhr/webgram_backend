@@ -4,6 +4,7 @@ from typing import final
 from src.application.user.dtos.user import OutboundUserDTO, UpdateUserDTO, VerifyPasswordDTO
 from src.domain.services.password_hash_service import PasswordHashService
 from src.domain.user.entities.user import User
+from src.infrastructure.db.agent.mappers.agent import AgentDBMapper
 from src.infrastructure.db.models import UserModel
 from src.infrastructure.db.user.mappers.role import RoleDBMapper
 
@@ -12,6 +13,7 @@ from src.infrastructure.db.user.mappers.role import RoleDBMapper
 @dataclass(frozen=True, slots=True)
 class UserDBMapper:
     _role_mapper: RoleDBMapper
+    _agent_mapper: AgentDBMapper
     _password_hash: PasswordHashService
 
     def to_model(self, entity: User) -> UserModel:
@@ -24,10 +26,12 @@ class UserDBMapper:
 
     def to_dto(self, model: UserModel) -> OutboundUserDTO:
         role = self._role_mapper.to_dto(model.role)
+        agent = self._agent_mapper.to_dto(model.agent) if model.agent else None
         return OutboundUserDTO(
             user_uuid=model.user_uuid,
             user_name=model.user_name,
             role=role,
+            agent=agent,
         )
 
     @staticmethod

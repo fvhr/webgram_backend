@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from typing import final
 
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, UUID
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from src.application.agents.ports.repository import AgentRepositoryProtocol
 from src.domain.agents.entities.agent import Agent
@@ -103,4 +104,47 @@ class AgentRepositorySQLAlchemy(AgentRepositoryProtocol):
             )
             raise RepositoryError(
                 f"Failed to save new agent status: {e}"
+            ) from e
+
+    async def get_free_agents(self) -> list[Agent]:
+        try:
+            stmt = select(AgentModel).where(AgentModel.user_uuid.is_(None)).order_by(AgentModel.agent_number)
+            result = await self.session.execute(stmt)
+            agent_models = result.scalars().all()
+            return [
+                self.mapper.to_entity(agent_model)
+                for agent_model in agent_models
+            ]
+        except SQLAlchemyError as e:
+            logger.critical(f'Failed to retrieve agents: {e}')
+            raise RepositoryError(f'Failed to retrieve agents: {e}') from e
+
+    async def set_user(self, agent_uuid: str, user_uuid: UUID) -> str | None:
+        try:
+            stmt = select(AgentModel).where(
+                AgentModel.agent_uuid
+                == agent_uuid
+            ).options(
+                selectinload(AgentModel.user)
+            )
+            result = await self.session.execute(stmt)
+            agent_model = result.scalar_one_or_none()
+            if not agent_model:
+                return None
+            agent_model.user_uuid = user_uuid
+            await self.session.commit()
+            return agent_uuid
+        except IntegrityError as e:
+            logger.critical(
+                f"Conflict while set user uuid '{user_uuid}' to agent '{agent_uuid}': {e}"
+            )
+            raise ConflictRepositoryError(
+                f"Conflict while set user uuid '{user_uuid}' to agent '{agent_uuid}': {e}"
+            ) from e
+        except SQLAlchemyError as e:
+            logger.critical(
+                f"Failed to set user uuid '{user_uuid}' to agent '{agent_uuid}': {e}"
+            )
+            raise RepositoryError(
+                f"Failed set user uuid '{user_uuid}' to agent '{agent_uuid}': {e}"
             ) from e

@@ -17,3 +17,4 @@ class UserModel(Base):
                                                  nullable=False)
 
     role = relationship('RoleModel', back_populates='users', lazy='selectin')
+    agent = relationship('AgentModel', back_populates='user', lazy='selectin', uselist=False)

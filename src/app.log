@@ -46,3 +46,14 @@ FROM webgram_extensions]
 2026-04-07 15:04:44,066 - src.logger - CRITICAL - 2026-04-07 15:04:44.066524 C:\Users\RomanTkachenko\PycharmProjects\webgram_backend\src\infrastructure\fs_events\fs_events.py:34 - name 'gevent' is not defined
 2026-04-07 15:04:49,106 - src.logger - CRITICAL - 2026-04-07 15:04:49.106017 C:\Users\RomanTkachenko\PycharmProjects\webgram_backend\src\infrastructure\fs_events\fs_events.py:34 - name 'gevent' is not defined
 2026-04-07 15:04:54,154 - src.logger - CRITICAL - 2026-04-07 15:04:54.153869 C:\Users\RomanTkachenko\PycharmProjects\webgram_backend\src\infrastructure\fs_events\fs_events.py:34 - name 'gevent' is not defined
+2026-04-20 17:30:39,656 - src.logger - CRITICAL - 2026-04-20 17:30:39.655678 Failed to retrieve user by user_uuid 'None': (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.DataError'>: invalid input for query argument $1: 'None' (invalid UUID 'None': length must be between 32..36 characters, got 4)
+[SQL: SELECT webgram_users.user_uuid, webgram_users.user_name, webgram_users.user_password, webgram_users.role_uuid 
+FROM webgram_users 
+WHERE webgram_users.user_uuid = $1::UUID]
+[parameters: ('None',)]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+2026-04-20 17:34:20,236 - src.logger - CRITICAL - 2026-04-20 17:34:20.236359 Conflict while set user uuid '72b5acd8-2355-47ef-840b-c1fbe56e6dc2' to agent '90ad6dca-bb29-4b85-9033-7fea79a32dd0': (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table "webgram_agents" violates foreign key constraint "webgram_agents_user_uuid_fkey"
+DETAIL:  Key (user_uuid)=(72b5acd8-2355-47ef-840b-c1fbe56e6dc2) is not present in table "webgram_users".
+[SQL: UPDATE webgram_agents SET user_uuid=$1::UUID WHERE webgram_agents.agent_uuid = $2::UUID]
+[parameters: (UUID('72b5acd8-2355-47ef-840b-c1fbe56e6dc2'), UUID('90ad6dca-bb29-4b85-9033-7fea79a32dd0'))]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)

@@ -24,7 +24,8 @@ class ViewUserRepositorySQLAlchemy(ViewUserRepositoryProtocol):
         try:
             stmt = select(UserModel).where(
                 UserModel.user_uuid == user_uuid).options(
-                selectinload(UserModel.role)
+                selectinload(UserModel.role),
+                selectinload(UserModel.agent)
             )
             result = await self.session.execute(stmt)
             user_model = result.scalar_one_or_none()

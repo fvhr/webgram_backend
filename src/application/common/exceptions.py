@@ -8,3 +8,6 @@ class AlreadyExistsError(Exception):
 
 class ForbiddenError(Exception):
     """Exception raised когда не хватает прав."""
+
+class FSAPIError(Exception):
+    """Ошибки апи freeswitch"""

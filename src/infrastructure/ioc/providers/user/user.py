@@ -18,6 +18,7 @@ from src.application.user.use_cases.users.get_user import GetUserUseCase
 from src.application.user.use_cases.users.get_users import GetUsersUseCase
 from src.application.user.use_cases.users.update_user import UpdateUserUseCase
 from src.domain.services.password_hash_service import PasswordHashService
+from src.infrastructure.db.agent.mappers.agent import AgentDBMapper
 from src.infrastructure.db.user.mappers.role import RoleDBMapper
 from src.infrastructure.db.user.mappers.user import UserDBMapper
 from src.infrastructure.db.user.repositories.user import UserRepositorySQLAlchemy
@@ -44,8 +45,9 @@ class UserMapperProvider(Provider):
 
     @provide(scope=Scope.REQUEST)
     async def get_user_db_mapper(self, role_db_mapper: RoleDBMapper,
+                                 agent_db_mapper: AgentDBMapper,
                                  password_hash_service: PasswordHashService) -> UserDBMapper:
-        return UserDBMapper(role_db_mapper, password_hash_service)
+        return UserDBMapper(role_db_mapper, agent_db_mapper, password_hash_service)
 
 
 class UserUseCaseProvider(Provider):

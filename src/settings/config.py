@@ -24,6 +24,10 @@ class Settings:
     FS_PORT: int = field(default_factory=lambda: env('FS_PORT'))
     FS_PASSWORD: str = field(default_factory=lambda: env('FS_PASSWORD'))
 
+    FSAPI_URL: str = field(default_factory=lambda: env('FSAPI_URL'))
+    FSAPI_USERNAME: str = field(default_factory=lambda: env('FSAPI_USERNAME'))
+    FSAPI_PASSWORD: str = field(default_factory=lambda: env('FSAPI_PASSWORD'))
+
     JWT_SECRET_KEY: str = field(default_factory=lambda: env("JWT_SECRET_KEY"))
     DEVELOP_MODE: str = field(default_factory=lambda: env("DEVELOP_MODE"))
 

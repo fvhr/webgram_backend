@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import (
 
 from src.application.agents.event_handlers.status_change import AgentStatusChangeEventHandler
 from src.application.common.mappers import EventDTOMapper
-from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol
+from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol, FreeswitchAPIProtocol
 from src.application.common.ports.mapper import EventDtoEntityMapperProtocol
 from src.application.common.service.collect_handlers_service import CollectHandlersService
 from src.application.domain.event_handlers.heartbeat import DomainHeartbeatEventHandler
@@ -26,6 +26,7 @@ from src.infrastructure.db.common.mappers.extension import ExtensionGatewayDBMap
 from src.infrastructure.db.common.mappers.queue import QueueGatewayDBMapper
 from src.infrastructure.fs_events.fs_events import FreeSwitchEventListen
 from src.infrastructure.fs_events.mappers import EventMapper
+from src.infrastructure.fsapi.fsapi import ASyncFSAPI
 from src.infrastructure.websocket.ws_manager import WebSocketManager
 from src.presentation.api.v1.websocket.connection_manager import ConnectionManager
 from src.settings import Settings
@@ -137,6 +138,12 @@ class WebSocketProvider(Provider):
         return WebSocketManager(_connection_manager=connection_manager)
 
 
+class FSAPIProvider(Provider):
+    @provide(scope=Scope.APP)
+    def get_fsapi(self, settings: Settings) -> FreeswitchAPIProtocol:
+        return ASyncFSAPI(settings)
+
+
 def get_common_providers() -> list[Provider]:
     return [
         SettingsProvider(),
@@ -146,4 +153,5 @@ def get_common_providers() -> list[Provider]:
         AtcGatewayProvider(),
         FreeswitchEventsProvider(),
         WebSocketProvider(),
+        FSAPIProvider(),
     ]

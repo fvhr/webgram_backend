@@ -11,3 +11,4 @@ bcrypt==4.3.0
 authx==1.5.2
 genesis==2026.1.25
 websockets==16.0
+aiohttp==3.13.5

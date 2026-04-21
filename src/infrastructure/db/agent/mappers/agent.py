@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import final
 
+from src.application.agents.dtos.agent import AgentDTO
 from src.domain.agents.entities.agent import Agent
 from src.domain.agents.value_objects.agent_number import AgentNumber
 from src.infrastructure.db.models.agent import AgentModel
@@ -31,6 +32,17 @@ class AgentDBMapper:
             domain_uuid=entity.domain_uuid,
             user_uuid=entity.user_uuid,
             agent_status=entity.agent_status,
+        )
+
+    @staticmethod
+    def to_dto(model: AgentModel) -> AgentDTO:
+        return AgentDTO(
+            agent_uuid=model.agent_uuid,
+            agent_name=model.agent_name,
+            agent_number=model.agent_number,
+            agent_password=model.agent_password,
+            domain_uuid=model.domain_uuid,
+            agent_status=model.agent_status,
         )
 
     @staticmethod

@@ -4,6 +4,7 @@ from typing import final
 from src.application.user.dtos.role import RoleDTO
 from src.application.user.dtos.user import InboundUserDTO, OutboundUserDTO, UpdateUserDTO, UpdatePasswordDTO, LoginDTO, \
     TokensDTO, RefreshDTO
+from src.presentation.api.v1.agent.mappers import AgentPresentationMapper
 from src.presentation.api.v1.user.schemas.responses import RoleResponseSchema, UserResponseSchema, \
     AccessTokenResponseSchema, TokensResponseSchema
 from src.presentation.api.v1.user.schemas.schema import RoleSchema, UserSchema, UpdateUserSchema, \
@@ -40,6 +41,7 @@ class UserPresentationMapper:
             user_uuid=dto.user_uuid,
             user_name=dto.user_name,
             role=RolePresentationMapper.to_response(dto.role),
+            agent=AgentPresentationMapper.to_response(dto.agent) if dto.agent else None,
         )
 
     @staticmethod

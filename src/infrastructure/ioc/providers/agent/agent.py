@@ -6,7 +6,10 @@ from src.application.agents.mappers import AgentDTOMapper
 from src.application.agents.ports.mappers import AgentDtoEntityMapperProtocol
 from src.application.agents.ports.repository import AgentRepositoryProtocol
 from src.application.agents.service.sync_agent_service import SyncAgentService
-from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol
+from src.application.agents.use_cases.get_free_agents import GetFreeAgentsUseCase
+from src.application.agents.use_cases.set_status import SetStatusUseCase
+from src.application.agents.use_cases.set_user import SetUserUseCase
+from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol, FreeswitchAPIProtocol
 from src.application.common.ports.mapper import EventDtoEntityMapperProtocol
 from src.infrastructure.db.agent.mappers.agent import AgentDBMapper
 from src.infrastructure.db.agent.repositories.agent import AgentRepositorySQLAlchemy
@@ -59,10 +62,36 @@ class AgentEventHandlersProvider(Provider):
                                              _ws_manager=ws_manager, _agent_mapper=agent_mapper)
 
 
+class AgentUseCaseProvider(Provider):
+    @provide(scope=Scope.REQUEST)
+    async def get_free_agents_use_case(
+            self,
+            agent_repository: AgentRepositoryProtocol,
+            agent_mapper: AgentDtoEntityMapperProtocol,
+    ) -> GetFreeAgentsUseCase:
+        return GetFreeAgentsUseCase(_agent_repository=agent_repository,
+                                    _agent_mapper=agent_mapper)
+
+    @provide(scope=Scope.REQUEST)
+    async def set_user_use_case(
+            self,
+            agent_repository: AgentRepositoryProtocol,
+    ) -> SetUserUseCase:
+        return SetUserUseCase(_agent_repository=agent_repository)
+
+    @provide(scope=Scope.REQUEST)
+    async def set_status_use_case(
+            self,
+            fsapi: FreeswitchAPIProtocol,
+    ) -> SetStatusUseCase:
+        return SetStatusUseCase(_fsapi=fsapi)
+
+
 def get_agent_providers() -> list[Provider]:
     return [
         AgentRepositoryProvider(),
         AgentMapperProvider(),
         AgentServiceProvider(),
         AgentEventHandlersProvider(),
+        AgentUseCaseProvider(),
     ]

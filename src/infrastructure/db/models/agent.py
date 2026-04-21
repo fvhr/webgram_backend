@@ -1,7 +1,7 @@
 import uuid
 
 from sqlalchemy import String, UUID, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infrastructure.db.models import Base
 
@@ -20,3 +20,5 @@ class AgentModel(Base):
                                                  ForeignKey('webgram_users.user_uuid'),
                                                  nullable=True)
     agent_status: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    user = relationship('UserModel', back_populates='agent', lazy='selectin', uselist=False)

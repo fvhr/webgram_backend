@@ -30,3 +30,9 @@ class WebSocketManagerProtocol(Protocol):
     @abstractmethod
     async def broadcast_message(self, type_message: WebsocketMessageTypes, data: dict) -> None:
         raise NotImplementedError
+
+
+class FreeswitchAPIProtocol(Protocol):
+    @abstractmethod
+    async def send_command(self, command: str, params: str) -> str:
+        ...
