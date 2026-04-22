@@ -1,7 +1,7 @@
 import uuid
 
 from sqlalchemy import String, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infrastructure.db.models import Base
 
@@ -13,3 +13,5 @@ class DomainModel(Base):
     domain_name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     domain_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False)
     domain_description: Mapped[str] = mapped_column(String(255), nullable=True)
+
+    queues = relationship('QueueModel', back_populates='domain', lazy='selectin')

@@ -4,16 +4,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.application.agents.event_handlers.status_change import AgentStatusChangeEventHandler
 from src.application.agents.mappers import AgentDTOMapper
 from src.application.agents.ports.mappers import AgentDtoEntityMapperProtocol
-from src.application.agents.ports.repository import AgentRepositoryProtocol
+from src.application.agents.ports.repository import AgentRepositoryProtocol, ViewAgentRepositoryProtocol
 from src.application.agents.service.sync_agent_service import SyncAgentService
 from src.application.agents.use_cases.get_free_agents import GetFreeAgentsUseCase
+from src.application.agents.use_cases.set_queues import SetQueuesUseCase
 from src.application.agents.use_cases.set_status import SetStatusUseCase
 from src.application.agents.use_cases.set_user import SetUserUseCase
 from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol, FreeswitchAPIProtocol
 from src.application.common.ports.mapper import EventDtoEntityMapperProtocol
+from src.application.queues.ports.repository import ViewQueueRepositoryProtocol
+from src.application.tiers.ports.repository import TierRepositoryProtocol, ViewTierRepositoryProtocol
 from src.infrastructure.db.agent.mappers.agent import AgentDBMapper
 from src.infrastructure.db.agent.repositories.agent import AgentRepositorySQLAlchemy
+from src.infrastructure.db.agent.views.agent import ViewAgentRepositorySQLAlchemy
 from src.infrastructure.db.common.mappers.agent import AgentGatewayDBMapper
+from src.infrastructure.db.queue.mappers.queue import QueueDBMapper
 
 
 class AgentRepositoryProvider(Provider):
@@ -22,6 +27,11 @@ class AgentRepositoryProvider(Provider):
             -> AgentRepositoryProtocol:
         return AgentRepositorySQLAlchemy(session=session, mapper=db_mapper)
 
+    @provide(scope=Scope.REQUEST)
+    async def get_view_agent_repository(self, session: AsyncSession, db_mapper: AgentDBMapper) \
+            -> ViewAgentRepositoryProtocol:
+        return ViewAgentRepositorySQLAlchemy(session=session, mapper=db_mapper)
+
 
 class AgentMapperProvider(Provider):
     @provide(scope=Scope.APP)
@@ -29,8 +39,8 @@ class AgentMapperProvider(Provider):
         return AgentDTOMapper()
 
     @provide(scope=Scope.REQUEST)
-    async def get_agent_db_mapper(self) -> AgentDBMapper:
-        return AgentDBMapper()
+    async def get_agent_db_mapper(self, queue_db_mapper: QueueDBMapper) -> AgentDBMapper:
+        return AgentDBMapper(queue_db_mapper)
 
     @provide(scope=Scope.REQUEST)
     async def get_agent_gateway_db_mapper(self) -> AgentGatewayDBMapper:
@@ -85,6 +95,22 @@ class AgentUseCaseProvider(Provider):
             fsapi: FreeswitchAPIProtocol,
     ) -> SetStatusUseCase:
         return SetStatusUseCase(_fsapi=fsapi)
+
+    @provide(scope=Scope.REQUEST)
+    async def set_queues_use_case(
+            self,
+            view_tier_repository: ViewTierRepositoryProtocol,
+            tier_repository: TierRepositoryProtocol,
+            queue_view_repository: ViewQueueRepositoryProtocol,
+            agent_view_repository: ViewAgentRepositoryProtocol,
+            fsapi: FreeswitchAPIProtocol,
+    ) -> SetQueuesUseCase:
+        return SetQueuesUseCase(_view_tier_repository=view_tier_repository,
+                                _tier_repository=tier_repository,
+                                _queue_view_repository=queue_view_repository,
+                                _agent_view_repository=agent_view_repository,
+                                _fsapi=fsapi,
+                                )
 
 
 def get_agent_providers() -> list[Provider]:

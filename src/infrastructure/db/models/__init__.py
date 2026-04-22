@@ -5,6 +5,7 @@ from .domain import DomainModel
 from .agent import AgentModel
 from .extension import ExtensionModel
 from .queues import QueueModel
+from .tiers import TierModel
 
 __all__ = (
     'Base',
@@ -14,4 +15,5 @@ __all__ = (
     'AgentModel',
     'ExtensionModel',
     'QueueModel',
+    'TierModel',
 )

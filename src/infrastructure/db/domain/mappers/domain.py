@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import final
 
+from src.application.domain.dtos.domain import DomainDTO
 from src.domain.domain.entities.domain import Domain
 from src.domain.domain.value_objects.domain_name import DomainName
 from src.infrastructure.db.models import DomainModel
@@ -23,6 +24,15 @@ class DomainDBMapper:
         return DomainModel(
             domain_uuid=entity.domain_uuid,
             domain_name=entity.domain_name.value,
+            domain_enabled=entity.domain_enabled,
+            domain_description=entity.domain_description,
+        )
+
+    @staticmethod
+    def to_dto(entity: DomainModel) -> DomainDTO:
+        return DomainDTO(
+            domain_uuid=entity.domain_uuid,
+            domain_name=entity.domain_name,
             domain_enabled=entity.domain_enabled,
             domain_description=entity.domain_description,
         )

@@ -5,11 +5,14 @@ from src.application.agents.dtos.agent import AgentDTO
 from src.domain.agents.entities.agent import Agent
 from src.domain.agents.value_objects.agent_number import AgentNumber
 from src.infrastructure.db.models.agent import AgentModel
+from src.infrastructure.db.queue.mappers.queue import QueueDBMapper
 
 
 @final
 @dataclass(frozen=True, slots=True)
 class AgentDBMapper:
+    _queue_db_mapper: QueueDBMapper
+
     @staticmethod
     def to_entity(model: AgentModel) -> Agent:
         return Agent(
@@ -34,8 +37,8 @@ class AgentDBMapper:
             agent_status=entity.agent_status,
         )
 
-    @staticmethod
-    def to_dto(model: AgentModel) -> AgentDTO:
+    def to_dto(self, model: AgentModel) -> AgentDTO:
+        queues = [self._queue_db_mapper.to_dto(tier.queue) for tier in model.tiers]
         return AgentDTO(
             agent_uuid=model.agent_uuid,
             agent_name=model.agent_name,
@@ -43,6 +46,7 @@ class AgentDBMapper:
             agent_password=model.agent_password,
             domain_uuid=model.domain_uuid,
             agent_status=model.agent_status,
+            queues=queues,
         )
 
     @staticmethod

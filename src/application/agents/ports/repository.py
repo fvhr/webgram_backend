@@ -2,6 +2,7 @@ from abc import abstractmethod
 from typing import Protocol
 from uuid import UUID
 
+from src.application.agents.dtos.agent import AgentDTO
 from src.domain.agents.entities.agent import Agent
 
 
@@ -28,4 +29,10 @@ class AgentRepositoryProtocol(Protocol):
 
     @abstractmethod
     async def set_user(self, agent_uuid: str, user_uuid: UUID) -> str | None:
+        raise NotImplementedError
+
+
+class ViewAgentRepositoryProtocol(Protocol):
+    @abstractmethod
+    async def get_agent(self, agent_uuid: str) -> AgentDTO | None:
         raise NotImplementedError

@@ -22,3 +22,4 @@ class AgentModel(Base):
     agent_status: Mapped[str] = mapped_column(String(255), nullable=False)
 
     user = relationship('UserModel', back_populates='agent', lazy='selectin', uselist=False)
+    tiers = relationship('TierModel', back_populates='agent', lazy='selectin')

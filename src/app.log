@@ -57,3 +57,9 @@ DETAIL:  Key (user_uuid)=(72b5acd8-2355-47ef-840b-c1fbe56e6dc2) is not present i
 [SQL: UPDATE webgram_agents SET user_uuid=$1::UUID WHERE webgram_agents.agent_uuid = $2::UUID]
 [parameters: (UUID('72b5acd8-2355-47ef-840b-c1fbe56e6dc2'), UUID('90ad6dca-bb29-4b85-9033-7fea79a32dd0'))]
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
+2026-04-21 19:20:46,607 - src.logger - CRITICAL - 2026-04-21 19:20:46.607005 Failed to retrieve role by role_name 'superadmin': (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "webgram_tiers" does not exist
+[SQL: SELECT webgram_tiers.agent_uuid AS webgram_tiers_agent_uuid, webgram_tiers.tier_uuid AS webgram_tiers_tier_uuid, webgram_tiers.queue_uuid AS webgram_tiers_queue_uuid 
+FROM webgram_tiers 
+WHERE webgram_tiers.agent_uuid IN ($1::UUID)]
+[parameters: (UUID('90ad6dca-bb29-4b85-9033-7fea79a32dd0'),)]
+(Background on this error at: https://sqlalche.me/e/20/f405)

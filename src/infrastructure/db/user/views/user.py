@@ -9,7 +9,7 @@ from sqlalchemy.orm import selectinload
 from src.application.user.dtos.user import OutboundUserDTO, VerifyPasswordDTO
 from src.application.user.ports.repository import ViewUserRepositoryProtocol
 from src.infrastructure.db.exceptions import RepositoryError
-from src.infrastructure.db.models import UserModel
+from src.infrastructure.db.models import UserModel, AgentModel, TierModel
 from src.infrastructure.db.user.mappers.user import UserDBMapper
 from src.logger import logger
 
@@ -23,9 +23,10 @@ class ViewUserRepositorySQLAlchemy(ViewUserRepositoryProtocol):
     async def get_user(self, user_uuid: str) -> OutboundUserDTO | None:
         try:
             stmt = select(UserModel).where(
-                UserModel.user_uuid == user_uuid).options(
+                UserModel.user_uuid == user_uuid
+            ).options(
                 selectinload(UserModel.role),
-                selectinload(UserModel.agent)
+                selectinload(UserModel.agent).selectinload(AgentModel.tiers).selectinload(TierModel.queue),
             )
             result = await self.session.execute(stmt)
             user_model = result.scalar_one_or_none()

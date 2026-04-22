@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from src.application.common.dto import DTO
+from src.application.queues.dtos.queue import QueueDTO
 
 
 @dataclass(frozen=True)
@@ -21,3 +22,11 @@ class AgentDTO(DTO):
     agent_password: str | None
     domain_uuid: UUID
     agent_status: str
+    queues: list[QueueDTO]
+
+
+@dataclass(frozen=True)
+class AgentFreeDTO(DTO):
+    agent_uuid: UUID
+    agent_name: str
+    agent_number: str | None

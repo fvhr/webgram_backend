@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import final
 
-from src.application.agents.dtos.agent import AgentAtcDTO, AgentDTO
+from src.application.agents.dtos.agent import AgentAtcDTO, AgentFreeDTO
 from src.application.agents.ports.mappers import AgentDtoEntityMapperProtocol
 from src.domain.agents.entities.agent import Agent
 from src.domain.agents.value_objects.agent_number import AgentNumber
@@ -11,14 +11,11 @@ from src.domain.agents.value_objects.agent_number import AgentNumber
 @dataclass(frozen=True, slots=True)
 class AgentDTOMapper(AgentDtoEntityMapperProtocol):
 
-    def to_dto(self, entity: Agent) -> AgentDTO:
-        return AgentDTO(
+    def to_free_dto(self, entity: Agent) -> AgentFreeDTO:
+        return AgentFreeDTO(
             agent_uuid=entity.agent_uuid,
             agent_name=entity.agent_name,
             agent_number=entity.agent_number.value,
-            agent_password=entity.agent_password,
-            domain_uuid=entity.domain_uuid,
-            agent_status=entity.agent_status,
         )
 
     def to_dict(self, entity: Agent) -> dict:
