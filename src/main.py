@@ -32,9 +32,9 @@ def create_app() -> FastAPI:
         version='1',
         description='Webgram Backend',
         lifespan=lifespan,
-        docs_url='/backend/api/docs',
-        redoc_url='/backend/api/redoc',
-        openapi_url='/backend/api/openapi.json',
+        docs_url='/api/docs',
+        redoc_url='/api/redoc',
+        openapi_url='/api/openapi.json',
     )
 
     app.add_middleware(
