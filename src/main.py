@@ -1,4 +1,5 @@
 import asyncio
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -13,6 +14,8 @@ from src.presentation.api.v1.exception_handlers import setup_exception_handlers
 from src.presentation.api.v1.routers import api_router
 from src.presentation.api.v1.websocket.router import ws_router
 from src.utils import start_default_functions
+
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
 
 
 @asynccontextmanager
@@ -36,9 +39,7 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            '*'
-        ],
+        allow_origins=[origin.strip() for origin in CORS_ORIGINS.split(",") if origin.strip()],
         allow_credentials=True,
         allow_methods=['*'],
         allow_headers=['*'],
