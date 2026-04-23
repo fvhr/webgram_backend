@@ -7,13 +7,16 @@ from src.application.agents.mappers import AgentDTOMapper
 from src.application.agents.ports.mappers import AgentDtoEntityMapperProtocol
 from src.application.agents.ports.repository import AgentRepositoryProtocol, ViewAgentRepositoryProtocol
 from src.application.agents.service.sync_agent_service import SyncAgentService
+from src.application.agents.use_cases.end_call import EndCallUseCase
 from src.application.agents.use_cases.get_free_agents import GetFreeAgentsUseCase
 from src.application.agents.use_cases.set_queues import SetQueuesUseCase
 from src.application.agents.use_cases.set_status import SetStatusUseCase
 from src.application.agents.use_cases.set_user import SetUserUseCase
+from src.application.agents.use_cases.spy_agent import SpyAgentUseCase
 from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol, FreeswitchAPIProtocol
 from src.application.common.ports.mapper import EventDtoEntityMapperProtocol, FSAPIDtoEntityMapperProtocol
 from src.application.common.service.get_calls_service import GetCallsService
+from src.application.domain.ports.repository import DomainRepositoryProtocol
 from src.application.queues.ports.repository import ViewQueueRepositoryProtocol
 from src.application.tiers.ports.repository import TierRepositoryProtocol, ViewTierRepositoryProtocol
 from src.infrastructure.db.agent.mappers.agent import AgentDBMapper
@@ -121,6 +124,26 @@ class AgentUseCaseProvider(Provider):
                                 _agent_view_repository=agent_view_repository,
                                 _fsapi=fsapi,
                                 )
+
+    @provide(scope=Scope.REQUEST)
+    async def end_call_use_case(
+            self,
+            fsapi: FreeswitchAPIProtocol,
+    ) -> EndCallUseCase:
+        return EndCallUseCase(
+            _fsapi=fsapi,
+        )
+
+    @provide(scope=Scope.REQUEST)
+    async def spy_agent_use_case(
+            self,
+            domain_repository: DomainRepositoryProtocol,
+            fsapi: FreeswitchAPIProtocol,
+    ) -> SpyAgentUseCase:
+        return SpyAgentUseCase(
+            _domain_repository=domain_repository,
+            _fsapi=fsapi,
+        )
 
 
 def get_agent_providers() -> list[Provider]:

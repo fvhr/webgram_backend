@@ -17,3 +17,7 @@ class DomainRepositoryProtocol(Protocol):
     async def get_domains(self) -> list[Domain]:
         raise NotImplementedError
 
+    @abstractmethod
+    async def get_domain_name_by_domain_uuid(self, domain_uuid: str) -> str | None:
+        raise NotImplementedError
+

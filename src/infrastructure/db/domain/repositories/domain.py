@@ -76,3 +76,18 @@ class DomainRepositorySQLAlchemy(DomainRepositoryProtocol):
         except SQLAlchemyError as e:
             logger.critical(f'Failed to retrieve domains: {e}')
             raise RepositoryError(f'Failed to retrieve domains: {e}') from e
+
+
+    async def get_domain_name_by_domain_uuid(self, domain_uuid: str) -> str | None:
+        try:
+            stmt = select(DomainModel).where(DomainModel.domain_uuid == domain_uuid)
+            result = await self.session.execute(stmt)
+            domain_model = result.scalar_one_or_none()
+            if domain_model is None:
+                return None
+            return domain_model.domain_name
+        except SQLAlchemyError as e:
+            logger.critical(f"Failed to retrieve domain by domain_uuid '{domain_uuid}': {e}")
+            raise RepositoryError(
+                f"Failed to retrieve domain by domain_uuid '{domain_uuid}': {e}"
+            ) from e
