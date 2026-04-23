@@ -8,11 +8,14 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from src.application.agents.event_handlers.channel_create import ChannelCreateEventHandler
 from src.application.agents.event_handlers.status_change import AgentStatusChangeEventHandler
-from src.application.common.mappers import EventDTOMapper
+from src.application.agents.ports.repository import AgentRepositoryProtocol
+from src.application.common.mappers import EventDTOMapper, FSAPIDTOMapper
 from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol, FreeswitchAPIProtocol
-from src.application.common.ports.mapper import EventDtoEntityMapperProtocol
+from src.application.common.ports.mapper import EventDtoEntityMapperProtocol, FSAPIDtoEntityMapperProtocol
 from src.application.common.service.collect_handlers_service import CollectHandlersService
+from src.application.common.service.get_calls_service import GetCallsService
 from src.application.domain.event_handlers.heartbeat import DomainHeartbeatEventHandler
 from src.application.extensions.event_handlers.heartbeat import ExtensionHeartbeatEventHandler
 from src.application.queues.event_handlers.heartbeat import QueueHeartbeatEventHandler
@@ -69,11 +72,13 @@ class FreeswitchEventsProvider(Provider):
                                      extension_heartbeat_handler: ExtensionHeartbeatEventHandler,
                                      queue_heartbeat_handler: QueueHeartbeatEventHandler,
                                      agent_status_change_handler: AgentStatusChangeEventHandler,
+                                     agent_channel_create_handler: ChannelCreateEventHandler
                                      ) -> CollectHandlersService:
         return CollectHandlersService(_domain_heartbeat_handler=domain_heartbeat_handler,
                                       _extension_heartbeat_handler=extension_heartbeat_handler,
                                       _queue_heartbeat_handler=queue_heartbeat_handler,
-                                      _agent_status_change_handler=agent_status_change_handler)
+                                      _agent_status_change_handler=agent_status_change_handler,
+                                      _agent_channel_create_handler=agent_channel_create_handler)
 
     @provide(scope=Scope.APP)
     def event_mapper(self) -> EventMapper:
@@ -120,7 +125,7 @@ class DatabaseProvider(Provider):
             autocommit=False,
         )
 
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_session(
             self, session_maker: async_sessionmaker[AsyncSession]
     ) -> AsyncIterator[AsyncSession]:
@@ -140,8 +145,22 @@ class WebSocketProvider(Provider):
 
 class FSAPIProvider(Provider):
     @provide(scope=Scope.APP)
-    def get_fsapi(self, settings: Settings) -> FreeswitchAPIProtocol:
-        return ASyncFSAPI(settings)
+    def fsapi_mapper(self) -> FSAPIDtoEntityMapperProtocol:
+        return FSAPIDTOMapper()
+
+    @provide(scope=Scope.APP)
+    def get_fsapi(self, settings: Settings, mapper: FSAPIDtoEntityMapperProtocol) -> FreeswitchAPIProtocol:
+        return ASyncFSAPI(settings, mapper)
+
+    @provide(scope=Scope.REQUEST)
+    def get_get_calls_service(self,
+                              fsapi: FreeswitchAPIProtocol,
+                              agent_repository: AgentRepositoryProtocol,
+                              fsapi_mapper: FSAPIDtoEntityMapperProtocol,
+                              ) -> GetCallsService:
+        return GetCallsService(_fsapi=fsapi,
+                               _agent_repository=agent_repository,
+                               _fsapi_mapper=fsapi_mapper)
 
 
 def get_common_providers() -> list[Provider]:

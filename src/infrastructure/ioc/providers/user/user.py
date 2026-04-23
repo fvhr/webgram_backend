@@ -27,12 +27,12 @@ from src.settings import Settings
 
 
 class UserRepositoryProvider(Provider):
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_user_repository(self, session: AsyncSession, db_mapper: UserDBMapper) \
             -> UserRepositoryProtocol:
         return UserRepositorySQLAlchemy(session=session, mapper=db_mapper)
 
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_user_view_repository(self, session: AsyncSession, db_mapper: UserDBMapper) \
             -> ViewUserRepositoryProtocol:
         return ViewUserRepositorySQLAlchemy(session=session, mapper=db_mapper)
@@ -43,7 +43,7 @@ class UserMapperProvider(Provider):
     async def get_user_mapper(self) -> UserDtoEntityMapperProtocol:
         return UserDTOMapper()
 
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_user_db_mapper(self, role_db_mapper: RoleDBMapper,
                                  agent_db_mapper: AgentDBMapper,
                                  password_hash_service: PasswordHashService) -> UserDBMapper:

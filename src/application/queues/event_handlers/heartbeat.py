@@ -19,5 +19,5 @@ class QueueHeartbeatEventHandler(EventHandler):
             await self._queue_sync_service()
 
     @property
-    def get_event_name(self) -> str:
-        return EventTypes.HEARTBEAT
+    def get_event_names(self) -> list:
+        return [EventTypes.HEARTBEAT]

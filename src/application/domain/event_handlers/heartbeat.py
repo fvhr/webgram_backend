@@ -17,5 +17,5 @@ class DomainHeartbeatEventHandler(EventHandler):
             await self._domain_sync_service()
 
     @property
-    def get_event_name(self) -> str:
-        return EventTypes.HEARTBEAT
+    def get_event_names(self) -> list:
+        return [EventTypes.HEARTBEAT]

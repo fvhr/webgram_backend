@@ -13,7 +13,7 @@ from src.infrastructure.db.extension.repositories.extension import ExtensionRepo
 
 
 class ExtensionRepositoryProvider(Provider):
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_extension_repository(self, session: AsyncSession, db_mapper: ExtensionDBMapper) \
             -> ExtensionRepositoryProtocol:
         return ExtensionRepositorySQLAlchemy(session=session, mapper=db_mapper)
@@ -24,7 +24,7 @@ class ExtensionMapperProvider(Provider):
     async def get_extension_mapper(self) -> ExtensionDtoEntityMapperProtocol:
         return ExtensionDTOMapper()
 
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_extension_db_mapper(self) -> ExtensionDBMapper:
         return ExtensionDBMapper()
 

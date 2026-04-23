@@ -27,5 +27,5 @@ class AgentStatusChangeEventHandler(EventHandler):
                 await self._ws_manager.broadcast_message(WebsocketMessageTypes.AGENT_DATA, agent_dict)
 
     @property
-    def get_event_name(self) -> str:
-        return EventTypes.CUSTOM
+    def get_event_names(self) -> list:
+        return [EventTypes.CUSTOM]

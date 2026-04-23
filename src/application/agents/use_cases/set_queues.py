@@ -28,7 +28,7 @@ class SetQueuesUseCase:
                     queue_id = f'{queue_dto.queue_number}@{queue_dto.domain.domain_name}'
                     res = await self._fsapi.send_command('callcenter_config',
                                                          f'tier add {queue_id} {agent_uuid} 0 0')
-                    if 'OK' in res:
+                    if res:
                         tier = Tier(tier_uuid=uuid.uuid4(), agent_uuid=uuid.UUID(agent_uuid),
                                     queue_uuid=uuid.UUID(queue_uuid))
                         await self._tier_repository.create_tier(tier)
@@ -37,7 +37,7 @@ class SetQueuesUseCase:
                 queue_id = f'{tier.queue.queue_number}@{tier.queue.domain.domain_name}'
                 res = await self._fsapi.send_command('callcenter_config',
                                                      f'tier del {queue_id} {agent_uuid}')
-                if 'OK' in res:
+                if res:
                     await self._tier_repository.delete_tier(agent_uuid, str(tier.queue.queue_uuid))
         agent_dto = await self._agent_view_repository.get_agent(agent_uuid)
         if not agent_dto:

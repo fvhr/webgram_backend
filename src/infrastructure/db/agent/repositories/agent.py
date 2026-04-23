@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import final
 
 from sqlalchemy import select, delete, UUID
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError, MultipleResultsFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -147,4 +147,26 @@ class AgentRepositorySQLAlchemy(AgentRepositoryProtocol):
             )
             raise RepositoryError(
                 f"Failed set user uuid '{user_uuid}' to agent '{agent_uuid}': {e}"
+            ) from e
+
+    async def get_agent_uuid_by_agent_num(self, agent_num: str) -> UUID | None:
+        try:
+            stmt = select(AgentModel).where(
+                AgentModel.agent_number == agent_num)
+            result = await self.session.execute(stmt)
+            agent_model = result.scalar_one_or_none()
+            if agent_model is None:
+                return None
+            return agent_model.agent_uuid
+        except MultipleResultsFound as e:
+            logger.critical(
+                f"Failed to retrieve agent by agent_num '{agent_num}' found more then 1 agent: {e}")
+            raise RepositoryError(
+                f"Failed to retrieve agent by agent_num '{agent_num}' found more then 1 agent: {e}"
+            ) from e
+        except SQLAlchemyError as e:
+            logger.critical(
+                f"Failed to retrieve agent by agent_num '{agent_num}': {e}")
+            raise RepositoryError(
+                f"Failed to retrieve agent by agent_num '{agent_num}': {e}"
             ) from e

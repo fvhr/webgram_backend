@@ -13,7 +13,7 @@ from src.infrastructure.db.domain.repositories.domain import DomainRepositorySQL
 
 
 class DomainRepositoryProvider(Provider):
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_domain_repository(self, session: AsyncSession, db_mapper: DomainDBMapper) \
             -> DomainRepositoryProtocol:
         return DomainRepositorySQLAlchemy(session=session, mapper=db_mapper)
@@ -24,7 +24,7 @@ class DomainMapperProvider(Provider):
     async def get_domain_mapper(self) -> DomainDtoEntityMapperProtocol:
         return DomainDTOMapper()
 
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_domain_db_mapper(self) -> DomainDBMapper:
         return DomainDBMapper()
 

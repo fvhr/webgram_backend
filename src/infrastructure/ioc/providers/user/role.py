@@ -14,7 +14,7 @@ from src.infrastructure.db.user.repositories.role import RoleRepositorySQLAlchem
 
 
 class RoleRepositoryProvider(Provider):
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_role_repository(
             self, session: AsyncSession, db_mapper: RoleDBMapper
     ) -> RoleRepositoryProtocol:
@@ -26,7 +26,7 @@ class RoleMapperProvider(Provider):
     async def get_role_mapper(self) -> RoleDtoEntityMapperProtocol:
         return RoleDTOMapper()
 
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_role_db_mapper(self) -> RoleDBMapper:
         return RoleDBMapper()
 

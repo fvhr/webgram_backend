@@ -16,12 +16,12 @@ from src.infrastructure.db.queue.views.queue import ViewQueueRepositorySQLAlchem
 
 
 class QueueRepositoryProvider(Provider):
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_queue_repository(self, session: AsyncSession, db_mapper: QueueDBMapper) \
             -> QueueRepositoryProtocol:
         return QueueRepositorySQLAlchemy(session=session, mapper=db_mapper)
 
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_view_queue_repository(self, session: AsyncSession, db_mapper: QueueDBMapper) \
             -> ViewQueueRepositoryProtocol:
         return ViewQueueRepositorySQLAlchemy(session=session, mapper=db_mapper)
@@ -32,7 +32,7 @@ class QueueMapperProvider(Provider):
     async def get_queue_mapper(self) -> QueueDtoEntityMapperProtocol:
         return QueueDTOMapper()
 
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_queue_db_mapper(self, domain_db_mapper: DomainDBMapper) -> QueueDBMapper:
         return QueueDBMapper(domain_db_mapper)
 

@@ -30,8 +30,7 @@ class FreeSwitchEventListen:
     async def mapping_event(self, event: ESLEvent):
         event_dto = self.mapper.to_dto(event)
         event_name = event_dto.headers.get('Event-Name')
-        unique_events = set([handler.get_event_name for handler in self.collect_handlers_service.get_handlers])
-        if event_name not in unique_events:
+        if event_name not in self.get_handlers:
             return
         logger.debug(f'Получено событие: {event_name}')
         if event_name in self.get_handlers:
@@ -43,8 +42,9 @@ class FreeSwitchEventListen:
     def get_handlers(self) -> dict[str, list[EventHandler]]:
         handlers = {}
         for handler in self.collect_handlers_service.get_handlers:
-            if handler.get_event_name not in handlers:
-                handlers[handler.get_event_name] = [handler]
-            else:
-                handlers[handler.get_event_name].append(handler)
+            for event_name in  handler.get_event_names:
+                if event_name not in handlers:
+                    handlers[event_name] = [handler]
+                else:
+                    handlers[event_name].append(handler)
         return handlers

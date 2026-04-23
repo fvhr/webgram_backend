@@ -11,5 +11,5 @@ class SetStatusUseCase:
     async def __call__(self, agent_uuid: str, new_status: str) -> None:
         res = await self._fsapi.send_command('callcenter_config',
                                              f"agent set status {agent_uuid} '{new_status}'")
-        if 'OK' not in res:
+        if not res:
             raise FSAPIError(f'Не удалось поменять статус агенту "{agent_uuid}": {res}')

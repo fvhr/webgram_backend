@@ -1,6 +1,7 @@
 from dishka import Provider, Scope, provide
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.application.agents.event_handlers.channel_create import ChannelCreateEventHandler
 from src.application.agents.event_handlers.status_change import AgentStatusChangeEventHandler
 from src.application.agents.mappers import AgentDTOMapper
 from src.application.agents.ports.mappers import AgentDtoEntityMapperProtocol
@@ -11,7 +12,8 @@ from src.application.agents.use_cases.set_queues import SetQueuesUseCase
 from src.application.agents.use_cases.set_status import SetStatusUseCase
 from src.application.agents.use_cases.set_user import SetUserUseCase
 from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol, FreeswitchAPIProtocol
-from src.application.common.ports.mapper import EventDtoEntityMapperProtocol
+from src.application.common.ports.mapper import EventDtoEntityMapperProtocol, FSAPIDtoEntityMapperProtocol
+from src.application.common.service.get_calls_service import GetCallsService
 from src.application.queues.ports.repository import ViewQueueRepositoryProtocol
 from src.application.tiers.ports.repository import TierRepositoryProtocol, ViewTierRepositoryProtocol
 from src.infrastructure.db.agent.mappers.agent import AgentDBMapper
@@ -22,12 +24,12 @@ from src.infrastructure.db.queue.mappers.queue import QueueDBMapper
 
 
 class AgentRepositoryProvider(Provider):
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_agent_repository(self, session: AsyncSession, db_mapper: AgentDBMapper) \
             -> AgentRepositoryProtocol:
         return AgentRepositorySQLAlchemy(session=session, mapper=db_mapper)
 
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_view_agent_repository(self, session: AsyncSession, db_mapper: AgentDBMapper) \
             -> ViewAgentRepositoryProtocol:
         return ViewAgentRepositorySQLAlchemy(session=session, mapper=db_mapper)
@@ -38,7 +40,7 @@ class AgentMapperProvider(Provider):
     async def get_agent_mapper(self) -> AgentDtoEntityMapperProtocol:
         return AgentDTOMapper()
 
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     async def get_agent_db_mapper(self, queue_db_mapper: QueueDBMapper) -> AgentDBMapper:
         return AgentDBMapper(queue_db_mapper)
 
@@ -70,6 +72,14 @@ class AgentEventHandlersProvider(Provider):
     ) -> AgentStatusChangeEventHandler:
         return AgentStatusChangeEventHandler(_agent_repository=agent_repository, _event_mapper=event_mapper,
                                              _ws_manager=ws_manager, _agent_mapper=agent_mapper)
+
+    @provide(scope=Scope.REQUEST)
+    async def agent_channel_create_event_handler(
+            self,
+            get_calls_service: GetCallsService,
+            ws_manager: WebSocketManagerProtocol,
+    ) -> ChannelCreateEventHandler:
+        return ChannelCreateEventHandler(_ws_manager=ws_manager, _get_calls_service=get_calls_service)
 
 
 class AgentUseCaseProvider(Provider):

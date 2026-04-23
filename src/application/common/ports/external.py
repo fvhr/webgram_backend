@@ -2,6 +2,7 @@ from abc import abstractmethod
 from typing import Protocol
 
 from src.application.agents.dtos.agent import AgentAtcDTO
+from src.application.common.dtos.fsapi import ShowCallsDTO
 from src.application.extensions.dtos.extension import ExtensionAtcDTO
 from src.application.queues.dtos.queue import QueueAtcDTO
 from src.domain.domain.entities.domain import Domain
@@ -34,5 +35,9 @@ class WebSocketManagerProtocol(Protocol):
 
 class FreeswitchAPIProtocol(Protocol):
     @abstractmethod
-    async def send_command(self, command: str, params: str) -> str:
+    async def send_command(self, command: str, params: str) -> bool:
+        ...
+
+    @abstractmethod
+    async def get_calls_json(self) -> list[ShowCallsDTO]:
         ...
