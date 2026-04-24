@@ -15,6 +15,7 @@ class DomainHeartbeatEventHandler(EventHandler):
         self._heartbeat_count += 1
         if self._heartbeat_count == 5:
             await self._domain_sync_service()
+            self._heartbeat_count = 0
 
     @property
     def get_event_names(self) -> list:
