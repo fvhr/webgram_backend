@@ -48,8 +48,8 @@ class Settings:
         config.JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
         config.JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=1)
         config.JWT_SECRET_KEY = self.JWT_SECRET_KEY
-        config.JWT_COOKIE_SECURE = False
-        config.JWT_COOKIE_SAMESITE = "lax"
+        config.JWT_COOKIE_SECURE = True
+        config.JWT_COOKIE_SAMESITE = "none"
 
         if self.DEVELOP_MODE == "dev":
             config.JWT_COOKIE_CSRF_PROTECT = False

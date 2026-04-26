@@ -28,7 +28,8 @@ async def login(login_data: LoginSchema, response: Response, service: FromDishka
         httponly=True,
         max_age=int(settings.CONFIG.JWT_ACCESS_TOKEN_EXPIRES.total_seconds()),
         samesite=settings.CONFIG.JWT_COOKIE_SAMESITE,
-        secure=False,
+          secure=settings.CONFIG.JWT_COOKIE_SECURE,
+        path="/",
     )
     response.set_cookie(
         key=settings.CONFIG.JWT_REFRESH_COOKIE_NAME,
@@ -36,7 +37,8 @@ async def login(login_data: LoginSchema, response: Response, service: FromDishka
         httponly=True,
         max_age=int(settings.CONFIG.JWT_REFRESH_TOKEN_EXPIRES.total_seconds()),
         samesite=settings.CONFIG.JWT_COOKIE_SAMESITE,
-        secure=settings.CONFIG.JWT_COOKIE_SECURE,
+       secure=settings.CONFIG.JWT_COOKIE_SECURE,
+        path="/",
     )
     return AuthPresentationMapper.to_tokens_response(tokens_dto)
 
