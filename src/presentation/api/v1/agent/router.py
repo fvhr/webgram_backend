@@ -42,6 +42,7 @@ async def set_user(agent_uuid: UUID, user_uuid: UUID, set_user_use_case: FromDis
                    get_user_use_case: FromDishka[GetUserUseCase]) -> UserResponseSchema:
     user_dto = await get_user_use_case(str(user_uuid))
     await set_user_use_case(str(agent_uuid), user_dto)
+    user_dto = await get_user_use_case(str(user_uuid))
     return UserPresentationMapper.to_response(user_dto)
 
 
