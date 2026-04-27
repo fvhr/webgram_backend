@@ -43,30 +43,46 @@ async def login(login_data: LoginSchema, response: Response, service: FromDishka
     return AuthPresentationMapper.to_tokens_response(tokens_dto)
 
 
-@auth_router.post('/refresh',
-                  response_model=AccessTokenResponseSchema, )
+@auth_router.post('/refresh', response_model=AccessTokenResponseSchema)
 @inject
 async def refresh_token(
-        response: Response,
-        request: Request,
-        service: FromDishka[RefreshService],
-        settings: FromDishka[Settings]
+    response: Response,
+    request: Request,
+    service: FromDishka[RefreshService],
+    settings: FromDishka[Settings],
 ) -> AccessTokenResponseSchema:
-    token = request.cookies.get(settings.CONFIG.JWT_REFRESH_COOKIE_NAME, None)
+    token = request.cookies.get(settings.CONFIG.JWT_REFRESH_COOKIE_NAME)
+
     access_token_dto = await service(token)
+
     response.set_cookie(
         key=settings.CONFIG.JWT_ACCESS_COOKIE_NAME,
         value=access_token_dto.access_token,
         httponly=True,
         max_age=int(settings.CONFIG.JWT_ACCESS_TOKEN_EXPIRES.total_seconds()),
         samesite=settings.CONFIG.JWT_COOKIE_SAMESITE,
-        secure=False,
+        secure=settings.CONFIG.JWT_COOKIE_SECURE,
+        path="/",
     )
+
     return AuthPresentationMapper.to_access_token_response(access_token_dto)
 
 
-@auth_router.post('/logout', dependencies=[Depends(require_authorization())])
+@auth_router.post('/logout')
 @inject
 async def logout(response: Response, settings: FromDishka[Settings]):
-    response.delete_cookie(settings.CONFIG.JWT_ACCESS_COOKIE_NAME)
-    response.delete_cookie(settings.CONFIG.JWT_REFRESH_COOKIE_NAME)
+    response.delete_cookie(
+        key=settings.CONFIG.JWT_ACCESS_COOKIE_NAME,
+        path="/",
+        samesite=settings.CONFIG.JWT_COOKIE_SAMESITE,
+        secure=settings.CONFIG.JWT_COOKIE_SECURE,
+    )
+
+    response.delete_cookie(
+        key=settings.CONFIG.JWT_REFRESH_COOKIE_NAME,
+        path="/",
+        samesite=settings.CONFIG.JWT_COOKIE_SAMESITE,
+        secure=settings.CONFIG.JWT_COOKIE_SECURE,
+    )
+
+    return {"detail": "Logged out"}
