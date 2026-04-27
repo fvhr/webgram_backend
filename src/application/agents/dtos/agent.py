@@ -1,3 +1,4 @@
+import datetime
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -30,3 +31,12 @@ class AgentFreeDTO(DTO):
     agent_uuid: UUID
     agent_name: str
     agent_number: str | None
+
+
+@dataclass(frozen=True)
+class AgentHistoryDTO:
+    start_stamp: datetime.datetime
+    duration: str
+    direction: str
+    caller_id_number: str
+    destination_number: str

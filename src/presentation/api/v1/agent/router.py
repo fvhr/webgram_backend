@@ -6,20 +6,25 @@ from fastapi import APIRouter, Depends
 
 from src.application.agents.use_cases.end_call import EndCallUseCase
 from src.application.agents.use_cases.get_free_agents import GetFreeAgentsUseCase
+from src.application.agents.use_cases.get_history_by_day import GetHistoryAgentByDayUseCase
 from src.application.agents.use_cases.set_queues import SetQueuesUseCase
 from src.application.agents.use_cases.set_status import SetStatusUseCase
 from src.application.agents.use_cases.set_user import SetUserUseCase
 from src.application.agents.use_cases.spy_agent import SpyAgentUseCase
 from src.application.user.use_cases.users.get_user import GetUserUseCase
 from src.presentation.api.v1.agent.mappers import AgentPresentationMapper
-from src.presentation.api.v1.agent.schemas.responses import AgentResponseSchema, AgentFreeResponseSchema
+from src.presentation.api.v1.agent.schemas.responses import AgentResponseSchema, AgentFreeResponseSchema, \
+    AgentHistoryResponseSchema
 from src.presentation.api.v1.agent.schemas.schema import SetStatusAgent, SetQueuesAgent
 from src.presentation.api.v1.user.mappers import UserPresentationMapper
 from src.presentation.api.v1.user.schemas.responses import UserResponseSchema
-from src.presentation.api.v1.utils import require_roles
+from src.presentation.api.v1.utils import require_roles, require_authorization
 
 agent_router = APIRouter(prefix='/agent', tags=['Agent'],
                          dependencies=[Depends(require_roles(['superadmin', 'supervisor']))])
+
+agent_operator_router = APIRouter(prefix='/agent-operator', tags=['AgentOperator'],
+                                  dependencies=[Depends(require_authorization)])
 
 
 @agent_router.get('/free-agents', response_model=list[AgentFreeResponseSchema])
@@ -55,7 +60,7 @@ async def end_call(call_uuid: UUID, use_case: FromDishka[EndCallUseCase]) -> Non
 @agent_router.post('/spy-agent/{call_uuid}')
 @inject
 async def spy_agent(call_uuid: UUID, victim_agent_number: str, spy_agent_number: str, domain_uuid: UUID,
-                   use_case: FromDishka[SpyAgentUseCase]) -> None:
+                    use_case: FromDishka[SpyAgentUseCase]) -> None:
     await use_case(str(call_uuid), victim_agent_number, spy_agent_number, str(domain_uuid))
 
 
@@ -64,3 +69,11 @@ async def spy_agent(call_uuid: UUID, victim_agent_number: str, spy_agent_number:
 async def set_queues(data: SetQueuesAgent, use_case: FromDishka[SetQueuesUseCase]) -> AgentResponseSchema:
     agent_dto = await use_case(str(data.agent_uuid), [str(queue_uuid) for queue_uuid in data.queue_uuids])
     return AgentPresentationMapper.to_response(agent_dto)
+
+
+@agent_operator_router.get('/history-by-day/{agent_number}', response_model=list[AgentHistoryResponseSchema])
+@inject
+async def get_history_by_day(agent_number: str, use_case: FromDishka[GetHistoryAgentByDayUseCase]) -> list[
+    AgentHistoryResponseSchema]:
+    agent_history_dtos = await use_case(agent_number)
+    return [AgentPresentationMapper.to_history_response(agent_history_dto) for agent_history_dto in agent_history_dtos]

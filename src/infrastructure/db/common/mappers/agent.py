@@ -3,7 +3,7 @@ from typing import final
 
 from sqlalchemy import Row
 
-from src.application.agents.dtos.agent import AgentAtcDTO
+from src.application.agents.dtos.agent import AgentAtcDTO, AgentHistoryDTO
 
 
 @final
@@ -17,4 +17,14 @@ class AgentGatewayDBMapper:
             agent_number=model.agent_id,
             agent_password=model.agent_password,
             domain_uuid=model.domain_uuid,
+        )
+
+    @staticmethod
+    def to_history_dto(model: Row) -> AgentHistoryDTO:
+        return AgentHistoryDTO(
+            start_stamp=model.start_stamp,
+            duration=model.duration,
+            direction=model.direction,
+            caller_id_number=model.caller_id_number,
+            destination_number=model.destination_number,
         )

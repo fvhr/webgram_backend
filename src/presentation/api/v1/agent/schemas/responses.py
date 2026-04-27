@@ -1,3 +1,4 @@
+import datetime
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -19,3 +20,11 @@ class AgentResponseSchema(BaseModel):
     domain_uuid: UUID
     agent_status: str
     queues: list[QueueResponseSchema]
+
+
+class AgentHistoryResponseSchema(BaseModel):
+    start_stamp: datetime.datetime
+    duration: str
+    direction: str
+    caller_id_number: str
+    destination_number: str

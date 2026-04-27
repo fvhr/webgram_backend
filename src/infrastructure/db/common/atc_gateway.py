@@ -4,7 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.application.agents.dtos.agent import AgentAtcDTO
+from src.application.agents.dtos.agent import AgentAtcDTO, AgentHistoryDTO
 from src.application.common.ports.external import AtcGatewayProtocol
 from src.application.extensions.dtos.extension import ExtensionAtcDTO
 from src.application.queues.dtos.queue import QueueAtcDTO
@@ -80,4 +80,33 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
             logger.critical(f'Failed to retrieve atc queues: {e}')
             raise RepositoryError(
                 f'Failed to retrieve atc queues: {e}'
+            ) from e
+
+    async def get_atc_history_agent_by_day(self, agent_number: str) -> list[AgentHistoryDTO]:
+        try:
+            stmt = text('''
+            SELECT
+                start_stamp, 
+                TO_CHAR(
+                    (EXTRACT(EPOCH FROM (end_stamp - start_stamp)) || ' seconds')::INTERVAL,
+                    'MI:SS'
+                ) AS duration,
+                direction, 
+                caller_id_number,  
+                destination_number 
+            FROM v_xml_cdr 
+            WHERE 
+                (caller_id_number = :agent_number OR destination_number = :agent_number)
+                AND direction IN ('inbound', 'outbound')  
+                AND start_stamp >= NOW() - INTERVAL '1 day' 
+            ORDER BY start_stamp DESC;
+            ''')
+            params = {'agent_number': agent_number}
+            result = await self.session.execute(stmt, params=params)
+            history_models = result.all()
+            return [self.agent_mapper.to_history_dto(history_model) for history_model in history_models]
+        except SQLAlchemyError as e:
+            logger.critical(f'Failed to retrieve atc history agent by day: {e}')
+            raise RepositoryError(
+                f'Failed to retrieve atc history agent by day: {e}'
             ) from e

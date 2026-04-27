@@ -9,6 +9,7 @@ from src.application.agents.ports.repository import AgentRepositoryProtocol, Vie
 from src.application.agents.service.sync_agent_service import SyncAgentService
 from src.application.agents.use_cases.end_call import EndCallUseCase
 from src.application.agents.use_cases.get_free_agents import GetFreeAgentsUseCase
+from src.application.agents.use_cases.get_history_by_day import GetHistoryAgentByDayUseCase
 from src.application.agents.use_cases.set_queues import SetQueuesUseCase
 from src.application.agents.use_cases.set_status import SetStatusUseCase
 from src.application.agents.use_cases.set_user import SetUserUseCase
@@ -143,6 +144,15 @@ class AgentUseCaseProvider(Provider):
         return SpyAgentUseCase(
             _domain_repository=domain_repository,
             _fsapi=fsapi,
+        )
+
+    @provide(scope=Scope.REQUEST)
+    async def get_history_agent_by_day_use_case(
+            self,
+            atc_gateway: AtcGatewayProtocol,
+    ) -> GetHistoryAgentByDayUseCase:
+        return GetHistoryAgentByDayUseCase(
+            _atc_gateway=atc_gateway,
         )
 
 

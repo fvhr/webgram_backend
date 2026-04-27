@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import final
 
-from src.application.agents.dtos.agent import AgentDTO, AgentFreeDTO
-from src.presentation.api.v1.agent.schemas.responses import AgentFreeResponseSchema, AgentResponseSchema
+from src.application.agents.dtos.agent import AgentDTO, AgentFreeDTO, AgentHistoryDTO
+from src.presentation.api.v1.agent.schemas.responses import AgentFreeResponseSchema, AgentResponseSchema, \
+    AgentHistoryResponseSchema
 from src.presentation.api.v1.queue.mappers import QueuePresentationMapper
 
 
@@ -16,6 +17,17 @@ class AgentPresentationMapper:
             agent_uuid=dto.agent_uuid,
             agent_name=dto.agent_name,
             agent_number=dto.agent_number,
+        )
+
+    @staticmethod
+    def to_history_response(dto: AgentHistoryDTO) -> AgentHistoryResponseSchema:
+        """Convert Application DTO to API Response model."""
+        return AgentHistoryResponseSchema(
+            start_stamp=dto.start_stamp,
+            duration=dto.duration,
+            direction=dto.direction,
+            caller_id_number=dto.caller_id_number,
+            destination_number=dto.destination_number,
         )
 
     @staticmethod

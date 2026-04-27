@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Protocol
 
-from src.application.agents.dtos.agent import AgentAtcDTO
+from src.application.agents.dtos.agent import AgentAtcDTO, AgentHistoryDTO
 from src.application.common.dtos.fsapi import ShowCallsDTO
 from src.application.extensions.dtos.extension import ExtensionAtcDTO
 from src.application.queues.dtos.queue import QueueAtcDTO
@@ -24,6 +24,10 @@ class AtcGatewayProtocol(Protocol):
 
     @abstractmethod
     async def get_atc_queues(self) -> list[QueueAtcDTO]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_atc_history_agent_by_day(self, agent_number: str) -> list[AgentHistoryDTO]:
         raise NotImplementedError
 
 
