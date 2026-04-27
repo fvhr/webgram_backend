@@ -35,6 +35,10 @@ class AgentRepositoryProtocol(Protocol):
     async def get_agent_uuid_by_agent_num(self, agent_num: str) -> UUID | None:
         raise NotImplementedError
 
+    @abstractmethod
+    async def unset_user(self, agent_uuid: str) -> None:
+        raise NotImplementedError
+
 
 class ViewAgentRepositoryProtocol(Protocol):
     @abstractmethod

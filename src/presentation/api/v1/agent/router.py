@@ -40,8 +40,8 @@ async def get_free_agents(
 @inject
 async def set_user(agent_uuid: UUID, user_uuid: UUID, set_user_use_case: FromDishka[SetUserUseCase],
                    get_user_use_case: FromDishka[GetUserUseCase]) -> UserResponseSchema:
-    await set_user_use_case(str(agent_uuid), user_uuid)
     user_dto = await get_user_use_case(str(user_uuid))
+    await set_user_use_case(str(agent_uuid), user_dto)
     return UserPresentationMapper.to_response(user_dto)
 
 

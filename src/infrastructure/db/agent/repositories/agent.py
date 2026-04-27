@@ -170,3 +170,31 @@ class AgentRepositorySQLAlchemy(AgentRepositoryProtocol):
             raise RepositoryError(
                 f"Failed to retrieve agent by agent_num '{agent_num}': {e}"
             ) from e
+
+    async def unset_user(self, agent_uuid: str) -> None:
+        try:
+            stmt = select(AgentModel).where(
+                AgentModel.agent_uuid
+                == agent_uuid
+            )
+            result = await self.session.execute(stmt)
+            agent_model = result.scalar_one_or_none()
+            if not agent_model:
+                return None
+            agent_model.user_uuid = None
+            await self.session.commit()
+            return None
+        except IntegrityError as e:
+            logger.critical(
+                f"Conflict while unset user uuid agent '{agent_uuid}': {e}"
+            )
+            raise ConflictRepositoryError(
+                f"Conflict while unset user uuid to agent '{agent_uuid}': {e}"
+            ) from e
+        except SQLAlchemyError as e:
+            logger.critical(
+                f"Failed to unset user uuid to agent '{agent_uuid}': {e}"
+            )
+            raise RepositoryError(
+                f"Failed unset user uuid to agent '{agent_uuid}': {e}"
+            ) from e

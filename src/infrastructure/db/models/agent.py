@@ -16,7 +16,7 @@ class AgentModel(Base):
     domain_uuid: Mapped[uuid.UUID] = mapped_column(UUID,
                                                  ForeignKey('webgram_domains.domain_uuid'),
                                                  nullable=False)
-    user_uuid: Mapped[uuid.UUID] = mapped_column(UUID,
+    user_uuid: Mapped[uuid.UUID | None] = mapped_column(UUID,
                                                  ForeignKey('webgram_users.user_uuid'),
                                                  nullable=True)
     agent_status: Mapped[str] = mapped_column(String(255), nullable=False)
