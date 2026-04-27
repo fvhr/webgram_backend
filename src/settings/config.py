@@ -36,6 +36,13 @@ class Settings:
     EXTENSION_ATC_TABLE_NAME: str = 'v_extensions'
     QUEUE_ATC_TABLE_NAME: str = 'v_call_center_queues'
 
+    REDIS_HOST: str = field(default_factory=lambda: env("REDIS_HOST"))
+    REDIS_PORT: int = field(default_factory=lambda: env("REDIS_PORT"))
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}"
+
     @property
     def DATABASE_URL(self) -> str:
         return f'postgresql+asyncpg://{self.PG_USER}:{self.PG_PASS}@{self.PG_HOST}:{self.PG_PORT}/{self.PG_NAME}'

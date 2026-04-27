@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Protocol
+from typing import Protocol, Optional
 
 from src.application.agents.dtos.agent import AgentAtcDTO, AgentHistoryDTO
 from src.application.common.dtos.fsapi import ShowCallsDTO
@@ -45,3 +45,22 @@ class FreeswitchAPIProtocol(Protocol):
     @abstractmethod
     async def get_calls_json(self) -> list[ShowCallsDTO]:
         ...
+
+
+class RedisClientProtocol(Protocol):
+
+    @abstractmethod
+    async def get(self, key: str) -> Optional[str]:
+        pass
+
+    @abstractmethod
+    async def set(self, key: str, value: str, expire: Optional[int] = None) -> bool:
+        pass
+
+    @abstractmethod
+    async def delete(self, key: str) -> int:
+        pass
+
+    @abstractmethod
+    async def exists(self, key: str) -> bool:
+        pass

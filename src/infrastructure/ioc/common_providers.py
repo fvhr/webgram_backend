@@ -7,12 +7,14 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from redis import asyncio as aioredis
 
 from src.application.agents.event_handlers.channel_create import ChannelCreateEventHandler
 from src.application.agents.event_handlers.status_change import AgentStatusChangeEventHandler
 from src.application.agents.ports.repository import AgentRepositoryProtocol
 from src.application.common.mappers import EventDTOMapper, FSAPIDTOMapper
-from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol, FreeswitchAPIProtocol
+from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol, FreeswitchAPIProtocol, \
+    RedisClientProtocol
 from src.application.common.ports.mapper import EventDtoEntityMapperProtocol, FSAPIDtoEntityMapperProtocol
 from src.application.common.service.collect_handlers_service import CollectHandlersService
 from src.application.common.service.get_calls_service import GetCallsService
@@ -30,6 +32,7 @@ from src.infrastructure.db.common.mappers.queue import QueueGatewayDBMapper
 from src.infrastructure.fs_events.fs_events import FreeSwitchEventListen
 from src.infrastructure.fs_events.mappers import EventMapper
 from src.infrastructure.fsapi.fsapi import ASyncFSAPI
+from src.infrastructure.redis.aioredis import AioredisClient
 from src.infrastructure.websocket.ws_manager import WebSocketManager
 from src.presentation.api.v1.websocket.connection_manager import ConnectionManager
 from src.settings import Settings
@@ -133,6 +136,20 @@ class DatabaseProvider(Provider):
             yield session
 
 
+class RedisProvider(Provider):
+    @provide(scope=Scope.APP)
+    def get_redis_pool(self, settings: Settings) -> aioredis.Redis:
+        return aioredis.from_url(
+            settings.redis_url,
+            encoding="utf-8",
+            decode_responses=True,
+        )
+
+    @provide(scope=Scope.APP)
+    def get_redis_client(self, pool: aioredis.Redis) -> RedisClientProtocol:
+        return AioredisClient(_redis=pool)
+
+
 class WebSocketProvider(Provider):
     @provide(scope=Scope.APP)
     def get_connection_manager(self) -> ConnectionManager:
@@ -167,6 +184,7 @@ def get_common_providers() -> list[Provider]:
     return [
         SettingsProvider(),
         DatabaseProvider(),
+        RedisProvider(),
         PasswordHashServiceProvider(),
         AuthentificationProvider(),
         AtcGatewayProvider(),
