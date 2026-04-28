@@ -13,7 +13,7 @@ from src.presentation.api.v1.numbers.schemas.responses import NumbersResponseSch
 from src.presentation.api.v1.numbers.schemas.schema import NumbersSchema
 from src.presentation.api.v1.utils import require_authorization, require_roles
 
-numbers_router = APIRouter(prefix='/', tags=['Numbers'], )
+numbers_router = APIRouter(prefix='', tags=['Numbers'], )
 
 
 @numbers_router.get(
