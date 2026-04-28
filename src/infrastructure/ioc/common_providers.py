@@ -12,12 +12,14 @@ from redis import asyncio as aioredis
 from src.application.agents.event_handlers.channel_create import ChannelCreateEventHandler
 from src.application.agents.event_handlers.status_change import AgentStatusChangeEventHandler
 from src.application.agents.ports.repository import AgentRepositoryProtocol
-from src.application.common.mappers import EventDTOMapper, FSAPIDTOMapper
+from src.application.common.mappers import EventDTOMapper, FSAPIDTOMapper, CDREveryMinuteDTOMapper
 from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol, FreeswitchAPIProtocol, \
     RedisClientProtocol
-from src.application.common.ports.mapper import EventDtoEntityMapperProtocol, FSAPIDtoEntityMapperProtocol
+from src.application.common.ports.mapper import EventDtoEntityMapperProtocol, FSAPIDtoEntityMapperProtocol, \
+    CDREveryMinuteDtoDictMapperProtocol
 from src.application.common.service.collect_handlers_service import CollectHandlersService
 from src.application.common.service.get_calls_service import GetCallsService
+from src.application.common.use_cases.get_count_cdr_every_minute import GetCountCDREveryMinute
 from src.application.domain.event_handlers.heartbeat import DomainHeartbeatEventHandler
 from src.application.extensions.event_handlers.heartbeat import ExtensionHeartbeatEventHandler
 from src.application.queues.event_handlers.heartbeat import QueueHeartbeatEventHandler
@@ -26,6 +28,7 @@ from src.domain.services.password_hash_service import PasswordHashService
 from src.infrastructure.auth.authentification_from_auth_x import AuthentificationAuthX
 from src.infrastructure.db.common.atc_gateway import SqlAlchemyAtcGateway
 from src.infrastructure.db.common.mappers.agent import AgentGatewayDBMapper
+from src.infrastructure.db.common.mappers.cdr import CDREveryMinuteGatewayDBMapper
 from src.infrastructure.db.common.mappers.domain import DomainGatewayDBMapper
 from src.infrastructure.db.common.mappers.extension import ExtensionGatewayDBMapper
 from src.infrastructure.db.common.mappers.queue import QueueGatewayDBMapper
@@ -56,10 +59,11 @@ class AtcGatewayProvider(Provider):
                                  agent_mapper: AgentGatewayDBMapper,
                                  extension_mapper: ExtensionGatewayDBMapper,
                                  queue_mapper: QueueGatewayDBMapper,
+                                 cdr_mapper: CDREveryMinuteGatewayDBMapper,
                                  settings: Settings) -> AtcGatewayProtocol:
         return SqlAlchemyAtcGateway(session=session, settings=settings,
                                     domain_mapper=domain_mapper, agent_mapper=agent_mapper,
-                                    extension_mapper=extension_mapper, queue_mapper=queue_mapper)
+                                    extension_mapper=extension_mapper, queue_mapper=queue_mapper, cdr_mapper=cdr_mapper)
 
 
 class AuthentificationProvider(Provider):
@@ -180,6 +184,31 @@ class FSAPIProvider(Provider):
                                _fsapi_mapper=fsapi_mapper)
 
 
+class CDRProvider(Provider):
+    @provide(scope=Scope.APP)
+    def cdr_every_minute_mapper(self) -> CDREveryMinuteDtoDictMapperProtocol:
+        return CDREveryMinuteDTOMapper()
+
+    @provide(scope=Scope.APP)
+    def cdr_every_minute_db_mapper(self) -> CDREveryMinuteGatewayDBMapper:
+        return CDREveryMinuteGatewayDBMapper()
+
+
+class CommonUseCaseProvider(Provider):
+    @provide(scope=Scope.REQUEST)
+    async def get_cdr_count_every_minute_use_case(
+            self,
+            redis: RedisClientProtocol,
+            mapper: CDREveryMinuteDtoDictMapperProtocol,
+            atc_gateway: AtcGatewayProtocol,
+    ) -> GetCountCDREveryMinute:
+        return GetCountCDREveryMinute(
+            _redis=redis,
+            _mapper=mapper,
+            _atc_gateway=atc_gateway,
+        )
+
+
 def get_common_providers() -> list[Provider]:
     return [
         SettingsProvider(),
@@ -191,4 +220,6 @@ def get_common_providers() -> list[Provider]:
         FreeswitchEventsProvider(),
         WebSocketProvider(),
         FSAPIProvider(),
+        CDRProvider(),
+        CommonUseCaseProvider(),
     ]

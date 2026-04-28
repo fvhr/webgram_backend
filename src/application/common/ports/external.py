@@ -1,7 +1,9 @@
 from abc import abstractmethod
+from datetime import datetime
 from typing import Protocol, Optional
 
 from src.application.agents.dtos.agent import AgentAtcDTO, AgentHistoryDTO
+from src.application.common.dtos.cdr import CDREveryMinute
 from src.application.common.dtos.fsapi import ShowCallsDTO
 from src.application.extensions.dtos.extension import ExtensionAtcDTO
 from src.application.queues.dtos.queue import QueueAtcDTO
@@ -28,6 +30,10 @@ class AtcGatewayProtocol(Protocol):
 
     @abstractmethod
     async def get_atc_history_agent_by_day(self, agent_number: str) -> list[AgentHistoryDTO]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_count_cdr_every_minute(self, start_date: datetime, end_date: datetime) -> list[CDREveryMinute]:
         raise NotImplementedError
 
 

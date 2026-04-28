@@ -4,33 +4,19 @@ import logging.handlers
 import os
 import sys
 import traceback
-from datetime import datetime
-
-import pytz
+from src.utils import convert_to_moscow_time
 
 
 class LoggingRotate:
     """Класс логирования с ротацией лог файла по
     10 МБ и вывода в консоль с цветами."""
 
-    @staticmethod
-    def convert_to_moscow_time(value=None):
-        moscow_tz = pytz.timezone('Europe/Moscow')
-        if not value:
-            value = datetime.now(tz=moscow_tz)
-        if value is not None:
-            if value.tzinfo is None:
-                value = value.replace(tzinfo=pytz.utc)
-            value = value.astimezone(moscow_tz)
-            return value.replace(tzinfo=None)
-        return None
-
     def __init__(
-        self,
-        log_file: str,
-        level=logging.CRITICAL,
-        max_bytes: int = 10 * 1024 * 1024,
-        backup_count: int = 5,
+            self,
+            log_file: str,
+            level=logging.CRITICAL,
+            max_bytes: int = 10 * 1024 * 1024,
+            backup_count: int = 5,
     ):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(level)
@@ -57,12 +43,12 @@ class LoggingRotate:
         if text is not None:
             if isinstance(text, dict):
                 result += (
-                    json.dumps(
-                        self.convert_dict_to_str(text),
-                        ensure_ascii=False,
-                        indent=4,
-                    )
-                    + '\n'
+                        json.dumps(
+                            self.convert_dict_to_str(text),
+                            ensure_ascii=False,
+                            indent=4,
+                        )
+                        + '\n'
                 )
             else:
                 result += str(text)
@@ -103,14 +89,14 @@ class LoggingRotate:
         )
 
     def _log_message(
-        self,
-        msg: str,
-        log_func: callable,
-        console_log: bool,
-        print_func: callable,
+            self,
+            msg: str,
+            log_func: callable,
+            console_log: bool,
+            print_func: callable,
     ):
         """Общая функция для логирования сообщений."""
-        date = str(self.convert_to_moscow_time())
+        date = str(convert_to_moscow_time(None))
         msg = date + ' ' + msg
         if isinstance(msg, str):
             txt = self.prepare_text(msg)
@@ -141,12 +127,12 @@ class LoggingRotate:
 
         if isinstance(text, dict):
             return (
-                json.dumps(
-                    self.convert_dict_to_str(text),
-                    ensure_ascii=False,
-                    indent=4,
-                )
-                + '\n'
+                    json.dumps(
+                        self.convert_dict_to_str(text),
+                        ensure_ascii=False,
+                        indent=4,
+                    )
+                    + '\n'
             )
 
         return str(text)

@@ -1,3 +1,4 @@
+import datetime
 from dataclasses import dataclass
 
 from sqlalchemy import text
@@ -5,11 +6,13 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.application.agents.dtos.agent import AgentAtcDTO, AgentHistoryDTO
+from src.application.common.dtos.cdr import CDREveryMinute
 from src.application.common.ports.external import AtcGatewayProtocol
 from src.application.extensions.dtos.extension import ExtensionAtcDTO
 from src.application.queues.dtos.queue import QueueAtcDTO
 from src.domain.domain.entities.domain import Domain
 from src.infrastructure.db.common.mappers.agent import AgentGatewayDBMapper
+from src.infrastructure.db.common.mappers.cdr import CDREveryMinuteGatewayDBMapper
 from src.infrastructure.db.common.mappers.domain import DomainGatewayDBMapper
 from src.infrastructure.db.common.mappers.extension import ExtensionGatewayDBMapper
 from src.infrastructure.db.common.mappers.queue import QueueGatewayDBMapper
@@ -26,6 +29,7 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
     agent_mapper: AgentGatewayDBMapper
     extension_mapper: ExtensionGatewayDBMapper
     queue_mapper: QueueGatewayDBMapper
+    cdr_mapper: CDREveryMinuteGatewayDBMapper
 
     async def get_atc_domains(self) -> list[Domain]:
         try:
@@ -109,4 +113,57 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
             logger.critical(f'Failed to retrieve atc history agent by day: {e}')
             raise RepositoryError(
                 f'Failed to retrieve atc history agent by day: {e}'
+            ) from e
+
+    async def get_count_cdr_every_minute(self, start_date: datetime.datetime, end_date: datetime.datetime) -> list[
+        CDREveryMinute]:
+        try:
+            stmt = text('''
+            WITH RECURSIVE call_minutes AS (
+                SELECT
+                        xml_cdr_uuid,
+                        date_trunc('minute', start_stamp) AS current_minute,
+                        date_trunc('minute', COALESCE(end_stamp, NOW())) AS end_minute
+                      FROM
+                        v_xml_cdr
+                      WHERE
+                        start_stamp >= :start_date
+                        AND end_stamp < :end_date
+                        AND (
+                            end_stamp IS NOT NULL
+                            OR end_stamp IS NULL
+                        )
+                      UNION ALL
+                      SELECT
+                        xml_cdr_uuid,
+                        current_minute + INTERVAL '1 minute' AS current_minute,
+                        end_minute
+                      FROM
+                        call_minutes
+                      WHERE
+                        current_minute < end_minute
+                    )
+                    SELECT
+                      EXTRACT(HOUR FROM current_minute)::TEXT AS hour_of_day,
+                      EXTRACT(MINUTE FROM current_minute)::TEXT AS minute_of_hour,
+                      COUNT(xml_cdr_uuid) AS call_count
+                    FROM
+                      call_minutes
+                    WHERE
+                      current_minute >= :start_date
+                      AND current_minute < :end_date
+                    GROUP BY
+                      EXTRACT(HOUR FROM current_minute),
+                      EXTRACT(MINUTE FROM current_minute)
+                    ORDER BY
+                      hour_of_day, minute_of_hour;
+            ''')
+            params = {'start_date': start_date, 'end_date': end_date}
+            result = await self.session.execute(stmt, params=params)
+            cdr_count_models = result.all()
+            return [self.cdr_mapper.to_dto(cdr_model) for cdr_model in cdr_count_models]
+        except SQLAlchemyError as e:
+            logger.critical(f'Failed to retrieve count cdr every minute: {e}')
+            raise RepositoryError(
+                f'Failed to retrieve count cdr every minute: {e}'
             ) from e

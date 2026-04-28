@@ -2,9 +2,11 @@ from dataclasses import dataclass
 from typing import final
 from uuid import UUID
 
+from src.application.common.dtos.cdr import CDREveryMinute
 from src.application.common.dtos.event import EventDTO
 from src.application.common.dtos.fsapi import ShowCallsDTO
-from src.application.common.ports.mapper import EventDtoEntityMapperProtocol, FSAPIDtoEntityMapperProtocol
+from src.application.common.ports.mapper import EventDtoEntityMapperProtocol, FSAPIDtoEntityMapperProtocol, \
+    CDREveryMinuteDtoDictMapperProtocol
 from src.domain.events.entities.custom_event import CustomEvent
 
 
@@ -39,3 +41,21 @@ class FSAPIDTOMapper(FSAPIDtoEntityMapperProtocol):
             b_cid_num=data['b_dest'],
             direction=data['direction'],
         )
+
+
+@final
+@dataclass(frozen=True, slots=True)
+class CDREveryMinuteDTOMapper(CDREveryMinuteDtoDictMapperProtocol):
+    def to_dto(self, data: dict) -> CDREveryMinute:
+        return CDREveryMinute(
+            hour_of_day=data['hour_of_day'],
+            minute_of_hour=data['minute_of_hour'],
+            call_count=data['call_count']
+        )
+
+    def to_dict(self, dto: CDREveryMinute) -> dict:
+        return {
+            'hour_of_day': dto.hour_of_day,
+            'minute_of_hour': dto.minute_of_hour,
+            'call_count': dto.call_count,
+        }

@@ -63,3 +63,46 @@ FROM webgram_tiers
 WHERE webgram_tiers.agent_uuid IN ($1::UUID)]
 [parameters: (UUID('90ad6dca-bb29-4b85-9033-7fea79a32dd0'),)]
 (Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-28 11:15:03,310 - src.logger - CRITICAL - 2026-04-28 11:15:03.309158 Failed to retrieve count cdr every minute: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.DataError'>: invalid input for query argument $1: '2026-04-28 00:00:00' (expected a datetime.date or datetime.datetime instance, got 'str')
+[SQL: 
+            WITH RECURSIVE call_minutes AS (
+                SELECT
+                        xml_cdr_uuid,
+                        date_trunc('minute', start_stamp) AS current_minute,
+                        date_trunc('minute', COALESCE(end_stamp, NOW())) AS end_minute
+                      FROM
+                        v_xml_cdr
+                      WHERE
+                        start_stamp >= $1
+                        AND end_stamp < $2
+                        AND (
+                            end_stamp IS NOT NULL
+                            OR end_stamp IS NULL
+                        )
+                      UNION ALL
+                      SELECT
+                        xml_cdr_uuid,
+                        current_minute + INTERVAL '1 minute' AS current_minute,
+                        end_minute
+                      FROM
+                        call_minutes
+                      WHERE
+                        current_minute < end_minute
+                    )
+                    SELECT
+                      EXTRACT(HOUR FROM current_minute)::TEXT AS hour_of_day,
+                      EXTRACT(MINUTE FROM current_minute)::TEXT AS minute_of_hour,
+                      COUNT(xml_cdr_uuid) AS call_count
+                    FROM
+                      call_minutes
+                    WHERE
+                      current_minute >= $1
+                      AND current_minute < $2
+                    GROUP BY
+                      EXTRACT(HOUR FROM current_minute),
+                      EXTRACT(MINUTE FROM current_minute)
+                    ORDER BY
+                      hour_of_day, minute_of_hour;
+            ]
+[parameters: ('2026-04-28 00:00:00', '2026-04-29 00:00:00')]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
