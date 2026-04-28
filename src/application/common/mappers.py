@@ -5,8 +5,9 @@ from uuid import UUID
 from src.application.common.dtos.cdr import CDREveryMinute
 from src.application.common.dtos.event import EventDTO
 from src.application.common.dtos.fsapi import ShowCallsDTO
+from src.application.common.dtos.system_resources import RAMDTO, CPUDTO, DiskDTO
 from src.application.common.ports.mapper import EventDtoEntityMapperProtocol, FSAPIDtoEntityMapperProtocol, \
-    CDREveryMinuteDtoDictMapperProtocol
+    CDREveryMinuteDtoDictMapperProtocol, SystemEventsDtoDictMapperProtocol
 from src.domain.events.entities.custom_event import CustomEvent
 
 
@@ -58,4 +59,26 @@ class CDREveryMinuteDTOMapper(CDREveryMinuteDtoDictMapperProtocol):
             'hour_of_day': dto.hour_of_day,
             'minute_of_hour': dto.minute_of_hour,
             'call_count': dto.call_count,
+        }
+
+
+@final
+@dataclass(frozen=True, slots=True)
+class SystemEventsDTOMapper(SystemEventsDtoDictMapperProtocol):
+    def to_dict(self, ram_dto: RAMDTO, cpu_dto: CPUDTO, disk_dto: DiskDTO) -> dict:
+        return {
+            'ram': {
+                'total_gb': ram_dto.total_gb,
+                'used_gb': ram_dto.used_gb,
+                'free_gb': ram_dto.free_gb,
+            },
+            'disk': {
+                'total_gb': disk_dto.total_gb,
+                'used_gb': disk_dto.used_gb,
+                'free_gb': disk_dto.free_gb,
+            },
+            'cpu': {
+                'cpu_usage_percent': cpu_dto.cpu_usage_percent,
+                'cpu_free_percent': cpu_dto.cpu_free_percent,
+            },
         }

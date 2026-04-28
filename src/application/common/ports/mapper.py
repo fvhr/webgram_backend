@@ -4,6 +4,7 @@ from typing import Protocol
 from src.application.common.dtos.cdr import CDREveryMinute
 from src.application.common.dtos.event import EventDTO
 from src.application.common.dtos.fsapi import ShowCallsDTO
+from src.application.common.dtos.system_resources import DiskDTO, CPUDTO, RAMDTO
 from src.domain.events.entities.custom_event import CustomEvent
 
 
@@ -22,6 +23,7 @@ class FSAPIDtoEntityMapperProtocol(Protocol):
     def to_calls_dict(self, dto: ShowCallsDTO) -> dict:
         ...
 
+
 class CDREveryMinuteDtoDictMapperProtocol(Protocol):
     @abstractmethod
     def to_dto(self, data: dict) -> CDREveryMinute:
@@ -29,4 +31,10 @@ class CDREveryMinuteDtoDictMapperProtocol(Protocol):
 
     @abstractmethod
     def to_dict(self, dto: CDREveryMinute) -> dict:
+        ...
+
+
+class SystemEventsDtoDictMapperProtocol(Protocol):
+    @abstractmethod
+    def to_dict(self, ram_dto: RAMDTO, cpu_dto: CPUDTO, disk_dto: DiskDTO) -> dict:
         ...

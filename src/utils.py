@@ -1,6 +1,14 @@
+import asyncio
 import datetime
+from typing import Any
 
 import pytz
+
+
+async def scheduler(use_case: Any, interval: int = 5):
+    while True:
+        await use_case()
+        await asyncio.sleep(interval)
 
 
 def convert_to_moscow_time(value: datetime.datetime | None) -> datetime.datetime | None:

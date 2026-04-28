@@ -1,7 +1,6 @@
 import json
 import re
 from dataclasses import dataclass
-from json import JSONDecodeError
 from typing import Optional, Any
 from urllib.parse import quote
 
@@ -9,7 +8,6 @@ import aiohttp
 from aiohttp import BasicAuth
 
 from src.application.common.dtos.fsapi import ShowCallsDTO
-from src.application.common.exceptions import FSAPIError
 from src.application.common.ports.external import FreeswitchAPIProtocol
 from src.application.common.ports.mapper import FSAPIDtoEntityMapperProtocol
 from src.logger import logger

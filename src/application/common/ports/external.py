@@ -5,10 +5,11 @@ from typing import Protocol, Optional
 from src.application.agents.dtos.agent import AgentAtcDTO, AgentHistoryDTO
 from src.application.common.dtos.cdr import CDREveryMinute
 from src.application.common.dtos.fsapi import ShowCallsDTO
+from src.application.common.dtos.system_resources import RAMDTO, CPUDTO, DiskDTO
 from src.application.extensions.dtos.extension import ExtensionAtcDTO
 from src.application.queues.dtos.queue import QueueAtcDTO
 from src.domain.domain.entities.domain import Domain
-from src.domain.enums import WebsocketMessageTypes
+from src.domain.enums import WebsocketMessageTypes, WebsocketConnectionTypes
 
 
 class AtcGatewayProtocol(Protocol):
@@ -39,7 +40,8 @@ class AtcGatewayProtocol(Protocol):
 
 class WebSocketManagerProtocol(Protocol):
     @abstractmethod
-    async def broadcast_message(self, type_message: WebsocketMessageTypes, data: dict) -> None:
+    async def broadcast_message(self, type_message: WebsocketMessageTypes, data: dict,
+                                connection_type: WebsocketConnectionTypes) -> None:
         raise NotImplementedError
 
 
@@ -69,4 +71,18 @@ class RedisClientProtocol(Protocol):
 
     @abstractmethod
     async def exists(self, key: str) -> bool:
+        pass
+
+
+class GetSystemResourcesProtocol(Protocol):
+    @abstractmethod
+    async def get_ram(self) -> RAMDTO:
+        pass
+
+    @abstractmethod
+    async def get_cpu(self) -> CPUDTO:
+        pass
+
+    @abstractmethod
+    async def get_disk(self) -> DiskDTO:
         pass

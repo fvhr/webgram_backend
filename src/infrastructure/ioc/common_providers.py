@@ -12,13 +12,15 @@ from redis import asyncio as aioredis
 from src.application.agents.event_handlers.channel_create import ChannelCreateEventHandler
 from src.application.agents.event_handlers.status_change import AgentStatusChangeEventHandler
 from src.application.agents.ports.repository import AgentRepositoryProtocol
-from src.application.common.mappers import EventDTOMapper, FSAPIDTOMapper, CDREveryMinuteDTOMapper
+from src.application.common.mappers import EventDTOMapper, FSAPIDTOMapper, CDREveryMinuteDTOMapper, \
+    SystemEventsDTOMapper
 from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol, FreeswitchAPIProtocol, \
-    RedisClientProtocol
+    RedisClientProtocol, GetSystemResourcesProtocol
 from src.application.common.ports.mapper import EventDtoEntityMapperProtocol, FSAPIDtoEntityMapperProtocol, \
-    CDREveryMinuteDtoDictMapperProtocol
+    CDREveryMinuteDtoDictMapperProtocol, SystemEventsDtoDictMapperProtocol
 from src.application.common.service.collect_handlers_service import CollectHandlersService
 from src.application.common.service.get_calls_service import GetCallsService
+from src.application.common.service.send_system_events_service import SendSystemEventsService
 from src.application.common.use_cases.get_count_cdr_every_minute import GetCountCDREveryMinute
 from src.application.domain.event_handlers.heartbeat import DomainHeartbeatEventHandler
 from src.application.extensions.event_handlers.heartbeat import ExtensionHeartbeatEventHandler
@@ -36,6 +38,7 @@ from src.infrastructure.fs_events.fs_events import FreeSwitchEventListen
 from src.infrastructure.fs_events.mappers import EventMapper
 from src.infrastructure.fsapi.fsapi import ASyncFSAPI
 from src.infrastructure.redis.aioredis import AioredisClient
+from src.infrastructure.system_resources.get_system_resources import GetSystemResources
 from src.infrastructure.websocket.ws_manager import WebSocketManager
 from src.presentation.api.v1.websocket.connection_manager import ConnectionManager
 from src.settings import Settings
@@ -163,6 +166,25 @@ class WebSocketProvider(Provider):
     def get_websocket_manager(self, connection_manager: ConnectionManager) -> WebSocketManagerProtocol:
         return WebSocketManager(_connection_manager=connection_manager)
 
+    @provide(scope=Scope.APP)
+    def get_system_events_dto_dict_mapper(self) -> SystemEventsDtoDictMapperProtocol:
+        return SystemEventsDTOMapper()
+
+    @provide(scope=Scope.APP)
+    def get_system_resources(self) -> GetSystemResourcesProtocol:
+        return GetSystemResources()
+
+    @provide(scope=Scope.APP)
+    def get_send_system_events_service(
+            self,
+            system_resources: GetSystemResourcesProtocol,
+            mapper: SystemEventsDtoDictMapperProtocol,
+            ws_manager: WebSocketManagerProtocol,
+    ) -> SendSystemEventsService:
+        return SendSystemEventsService(_system_resources=system_resources,
+                                       _mapper=mapper,
+                                       _ws_manager=ws_manager)
+
 
 class FSAPIProvider(Provider):
     @provide(scope=Scope.APP)
@@ -173,7 +195,7 @@ class FSAPIProvider(Provider):
     def get_fsapi(self, settings: Settings, mapper: FSAPIDtoEntityMapperProtocol) -> FreeswitchAPIProtocol:
         return ASyncFSAPI(settings, mapper)
 
-    @provide(scope=Scope.REQUEST)
+    @provide(scope=Scope.SESSION)
     def get_get_calls_service(self,
                               fsapi: FreeswitchAPIProtocol,
                               agent_repository: AgentRepositoryProtocol,
