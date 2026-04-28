@@ -20,6 +20,7 @@ from src.application.common.ports.mapper import EventDtoEntityMapperProtocol, FS
     CDREveryMinuteDtoDictMapperProtocol, SystemEventsDtoDictMapperProtocol
 from src.application.common.service.collect_handlers_service import CollectHandlersService
 from src.application.common.service.get_calls_service import GetCallsService
+from src.application.common.service.send_call_count_event_service import SendCallCountService
 from src.application.common.service.send_system_events_service import SendSystemEventsService
 from src.application.common.use_cases.get_count_cdr_every_minute import GetCountCDREveryMinute
 from src.application.domain.event_handlers.heartbeat import DomainHeartbeatEventHandler
@@ -184,6 +185,15 @@ class WebSocketProvider(Provider):
         return SendSystemEventsService(_system_resources=system_resources,
                                        _mapper=mapper,
                                        _ws_manager=ws_manager)
+
+    @provide(scope=Scope.APP)
+    def get_send_call_count_event_service(
+            self,
+            fsapi: FreeswitchAPIProtocol,
+            ws_manager: WebSocketManagerProtocol,
+    ) -> SendCallCountService:
+        return SendCallCountService(_fsapi=fsapi,
+                                    _ws_manager=ws_manager)
 
 
 class FSAPIProvider(Provider):

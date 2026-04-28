@@ -6,6 +6,7 @@ class WebsocketMessageTypes(StrEnum):
     UPDATE_CALLS = 'UPDATE_CALLS'
     CONNECT_CALLS = 'CONNECT_CALLS'
     SYSTEM_RESOURCES_MONITORING = 'SYSTEM_RESOURCES_MONITORING'
+    CALL_COUNT = 'CALL_COUNT'
 
 
 class WebsocketConnectionTypes(StrEnum):

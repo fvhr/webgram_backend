@@ -43,6 +43,18 @@ class ASyncFSAPI(FreeswitchAPIProtocol):
                     return [self._mapper.to_calls_dto(call) for call in calls]
                 return []
 
+    async def get_calls_count(self) -> int:
+        auth = BasicAuth(self.settings.FSAPI_USERNAME, self.settings.FSAPI_PASSWORD)
+        encoded_params = quote('calls as json')
+        full_url = f'{self.settings.FSAPI_URL}/show?{encoded_params}'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(full_url, auth=auth) as response:
+                text = await response.text()
+                _json = self.extract_json_from_html(text)
+                if _json and 'row_count' in _json:
+                    return _json['row_count']
+                return 0
+
     @staticmethod
     def extract_json_from_html(html_text: str) -> Optional[Any]:
         """

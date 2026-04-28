@@ -46,7 +46,7 @@ async def set_user(agent_uuid: UUID, user_uuid: UUID, set_user_use_case: FromDis
     return UserPresentationMapper.to_response(user_dto)
 
 
-@agent_router.post('/set-status')
+@agent_operator_router.post('/set-status')
 @inject
 async def set_status(data: SetStatusAgent, use_case: FromDishka[SetStatusUseCase]) -> None:
     await use_case(str(data.agent_uuid), data.agent_status)

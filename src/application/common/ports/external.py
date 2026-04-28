@@ -54,6 +54,10 @@ class FreeswitchAPIProtocol(Protocol):
     async def get_calls_json(self) -> list[ShowCallsDTO]:
         ...
 
+    @abstractmethod
+    async def get_calls_count(self) -> int:
+        ...
+
 
 class RedisClientProtocol(Protocol):
 
