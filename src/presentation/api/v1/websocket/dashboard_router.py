@@ -9,7 +9,7 @@ from src.presentation.api.v1.websocket.connection_manager import ConnectionManag
 dashboard_ws_router = APIRouter(tags=['DashboardWebSocket'])
 
 
-@dashboard_ws_router.websocket('/dashboard')
+@dashboard_ws_router.websocket('/backend/dashboard')
 @inject
 async def dashboard_websocket_endpoint(websocket: WebSocket, connection_manager: FromDishka[ConnectionManager]):
     personal_uuid = await connection_manager.connect(websocket, WebsocketConnectionTypes.DASHBOARD)
