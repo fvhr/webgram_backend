@@ -10,7 +10,7 @@ from src.presentation.api.v1.websocket.connection_manager import ConnectionManag
 ws_router = APIRouter(tags=['WebSocket'])
 
 
-@ws_router.websocket('/backend')
+@ws_router.websocket('/backend/operator-panel')
 @inject
 async def websocket_endpoint(websocket: WebSocket, connection_manager: FromDishka[ConnectionManager],
                              get_calls_service: FromDishka[GetCallsService]):
