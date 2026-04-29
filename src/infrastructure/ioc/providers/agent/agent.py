@@ -24,6 +24,7 @@ from src.infrastructure.db.agent.mappers.agent import AgentDBMapper
 from src.infrastructure.db.agent.repositories.agent import AgentRepositorySQLAlchemy
 from src.infrastructure.db.agent.views.agent import ViewAgentRepositorySQLAlchemy
 from src.infrastructure.db.common.mappers.agent import AgentGatewayDBMapper
+from src.infrastructure.db.domain.mappers.domain import DomainDBMapper
 from src.infrastructure.db.queue.mappers.queue import QueueDBMapper
 
 
@@ -45,8 +46,9 @@ class AgentMapperProvider(Provider):
         return AgentDTOMapper()
 
     @provide(scope=Scope.SESSION)
-    async def get_agent_db_mapper(self, queue_db_mapper: QueueDBMapper) -> AgentDBMapper:
-        return AgentDBMapper(queue_db_mapper)
+    async def get_agent_db_mapper(self, queue_db_mapper: QueueDBMapper,
+                                  domain_db_mapper: DomainDBMapper) -> AgentDBMapper:
+        return AgentDBMapper(queue_db_mapper, domain_db_mapper)
 
     @provide(scope=Scope.REQUEST)
     async def get_agent_gateway_db_mapper(self) -> AgentGatewayDBMapper:

@@ -27,6 +27,7 @@ class ViewUserRepositorySQLAlchemy(ViewUserRepositoryProtocol):
             ).options(
                 selectinload(UserModel.role),
                 selectinload(UserModel.agent).selectinload(AgentModel.tiers).selectinload(TierModel.queue),
+                selectinload(UserModel.agent).selectinload(AgentModel.domain),
             )
             result = await self.session.execute(stmt)
             user_model = result.scalar_one_or_none()

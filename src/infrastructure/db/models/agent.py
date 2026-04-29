@@ -23,3 +23,4 @@ class AgentModel(Base):
 
     user = relationship('UserModel', back_populates='agent', lazy='selectin', uselist=False)
     tiers = relationship('TierModel', back_populates='agent', lazy='selectin')
+    domain = relationship('DomainModel', back_populates='agents', lazy='selectin')

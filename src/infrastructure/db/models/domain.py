@@ -15,3 +15,4 @@ class DomainModel(Base):
     domain_description: Mapped[str] = mapped_column(String(255), nullable=True)
 
     queues = relationship('QueueModel', back_populates='domain', lazy='selectin')
+    agents = relationship('AgentModel', back_populates='domain', lazy='selectin')

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from src.application.common.dto import DTO
+from src.application.domain.dtos.domain import DomainDTO
 from src.application.queues.dtos.queue import QueueDTO
 
 
@@ -23,6 +24,7 @@ class AgentDTO(DTO):
     agent_password: str | None
     domain_uuid: UUID
     agent_status: str
+    domain: DomainDTO
     queues: list[QueueDTO]
 
 

@@ -4,6 +4,7 @@ from typing import final
 from src.application.agents.dtos.agent import AgentDTO
 from src.domain.agents.entities.agent import Agent
 from src.domain.agents.value_objects.agent_number import AgentNumber
+from src.infrastructure.db.domain.mappers.domain import DomainDBMapper
 from src.infrastructure.db.models.agent import AgentModel
 from src.infrastructure.db.queue.mappers.queue import QueueDBMapper
 
@@ -12,6 +13,7 @@ from src.infrastructure.db.queue.mappers.queue import QueueDBMapper
 @dataclass(frozen=True, slots=True)
 class AgentDBMapper:
     _queue_db_mapper: QueueDBMapper
+    _domain_db_mapper: DomainDBMapper
 
     @staticmethod
     def to_entity(model: AgentModel) -> Agent:
@@ -39,6 +41,7 @@ class AgentDBMapper:
 
     def to_dto(self, model: AgentModel) -> AgentDTO:
         queues = [self._queue_db_mapper.to_dto(tier.queue) for tier in model.tiers]
+        domain = self._domain_db_mapper.to_dto(model.domain)
         return AgentDTO(
             agent_uuid=model.agent_uuid,
             agent_name=model.agent_name,
@@ -47,6 +50,7 @@ class AgentDBMapper:
             domain_uuid=model.domain_uuid,
             agent_status=model.agent_status,
             queues=queues,
+            domain=domain,
         )
 
     @staticmethod
