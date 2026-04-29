@@ -6,6 +6,7 @@ from .agent import AgentModel
 from .extension import ExtensionModel
 from .queues import QueueModel
 from .tiers import TierModel
+from .numbers import NumberModel
 
 __all__ = (
     'Base',
@@ -16,4 +17,5 @@ __all__ = (
     'ExtensionModel',
     'QueueModel',
     'TierModel',
+    'NumberModel',
 )

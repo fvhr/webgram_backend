@@ -6,6 +6,7 @@ from fastapi.params import Depends
 from src.application.common.use_cases.get_count_cdr_every_minute import GetCountCDREveryMinute
 from src.presentation.api.v1.agent.router import agent_router, agent_operator_router
 from src.presentation.api.v1.mappers import CommonPresentationMapper
+from src.presentation.api.v1.numbers.router import numbers_router
 from src.presentation.api.v1.queue.router import queue_router
 from src.presentation.api.v1.schemas.responses import CdrEveryMinuteResponseSchema
 from src.presentation.api.v1.user.auth.router import auth_router
@@ -32,3 +33,4 @@ api_router.include_router(auth_router)
 api_router.include_router(agent_router)
 api_router.include_router(queue_router)
 api_router.include_router(agent_operator_router)
+api_router.include_router(numbers_router)
