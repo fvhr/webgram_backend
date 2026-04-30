@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from src.presentation.api.v1.queue.schemas.responses import QueueResponseSchema
+from src.presentation.api.v1.schemas.responses import DomainResponseSchema
 
 
 class AgentFreeResponseSchema(BaseModel):
@@ -17,8 +18,8 @@ class AgentResponseSchema(BaseModel):
     agent_name: str
     agent_number: str | None
     agent_password: str | None
-    domain_uuid: UUID
     agent_status: str
+    domain: DomainResponseSchema
     queues: list[QueueResponseSchema]
 
 

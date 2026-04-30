@@ -9,6 +9,7 @@ class WebsocketMessageTypes(StrEnum):
     CALL_COUNT = 'CALL_COUNT'
 
 
-class WebsocketConnectionTypes(StrEnum):
+class WebsocketRoles(StrEnum):
     DASHBOARD = 'DASHBOARD'
-    OPERATOR_PANEL = 'OPERATOR_PANEL'
+    ADMIN = 'ADMIN'
+    OPERATOR = 'OPERATOR'

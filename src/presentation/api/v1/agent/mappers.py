@@ -4,6 +4,7 @@ from typing import final
 from src.application.agents.dtos.agent import AgentDTO, AgentFreeDTO, AgentHistoryDTO
 from src.presentation.api.v1.agent.schemas.responses import AgentFreeResponseSchema, AgentResponseSchema, \
     AgentHistoryResponseSchema
+from src.presentation.api.v1.mappers import DomainPresentationMapper
 from src.presentation.api.v1.queue.mappers import QueuePresentationMapper
 
 
@@ -33,12 +34,13 @@ class AgentPresentationMapper:
     @staticmethod
     def to_response(dto: AgentDTO) -> AgentResponseSchema:
         queues = [QueuePresentationMapper.to_response(queue_dto) for queue_dto in dto.queues]
+        domain = DomainPresentationMapper.to_response(dto.domain)
         return AgentResponseSchema(
             agent_uuid=dto.agent_uuid,
             agent_name=dto.agent_name,
             agent_number=dto.agent_number,
             agent_password=dto.agent_password,
-            domain_uuid=dto.domain_uuid,
             agent_status=dto.agent_status,
             queues=queues,
+            domain=domain,
         )

@@ -14,6 +14,7 @@ from src.application.agents.use_cases.set_queues import SetQueuesUseCase
 from src.application.agents.use_cases.set_status import SetStatusUseCase
 from src.application.agents.use_cases.set_user import SetUserUseCase
 from src.application.agents.use_cases.spy_agent import SpyAgentUseCase
+from src.application.agents.use_cases.upgrade_socket import UpgradeSocketUseCase
 from src.application.common.ports.external import AtcGatewayProtocol, WebSocketManagerProtocol, FreeswitchAPIProtocol
 from src.application.common.ports.mapper import EventDtoEntityMapperProtocol, FSAPIDtoEntityMapperProtocol
 from src.application.common.service.get_calls_service import GetCallsService
@@ -24,6 +25,7 @@ from src.infrastructure.db.agent.mappers.agent import AgentDBMapper
 from src.infrastructure.db.agent.repositories.agent import AgentRepositorySQLAlchemy
 from src.infrastructure.db.agent.views.agent import ViewAgentRepositorySQLAlchemy
 from src.infrastructure.db.common.mappers.agent import AgentGatewayDBMapper
+from src.infrastructure.db.domain.mappers.domain import DomainDBMapper
 from src.infrastructure.db.queue.mappers.queue import QueueDBMapper
 
 
@@ -45,8 +47,9 @@ class AgentMapperProvider(Provider):
         return AgentDTOMapper()
 
     @provide(scope=Scope.SESSION)
-    async def get_agent_db_mapper(self, queue_db_mapper: QueueDBMapper) -> AgentDBMapper:
-        return AgentDBMapper(queue_db_mapper)
+    async def get_agent_db_mapper(self, queue_db_mapper: QueueDBMapper,
+                                  domain_db_mapper: DomainDBMapper) -> AgentDBMapper:
+        return AgentDBMapper(queue_db_mapper, domain_db_mapper)
 
     @provide(scope=Scope.REQUEST)
     async def get_agent_gateway_db_mapper(self) -> AgentGatewayDBMapper:
@@ -153,6 +156,17 @@ class AgentUseCaseProvider(Provider):
     ) -> GetHistoryAgentByDayUseCase:
         return GetHistoryAgentByDayUseCase(
             _atc_gateway=atc_gateway,
+        )
+
+    @provide(scope=Scope.REQUEST)
+    async def upgrade_socket_use_case(
+            self,
+            get_calls_service: GetCallsService,
+            ws_manager: WebSocketManagerProtocol,
+    ) -> UpgradeSocketUseCase:
+        return UpgradeSocketUseCase(
+            _get_calls_service=get_calls_service,
+            _ws_manager=ws_manager,
         )
 
 

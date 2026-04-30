@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from typing import final
 
 from src.application.common.dtos.cdr import CDREveryMinute
-from src.presentation.api.v1.schemas.responses import CdrEveryMinuteResponseSchema
+from src.application.domain.dtos.domain import DomainDTO
+from src.presentation.api.v1.schemas.responses import CdrEveryMinuteResponseSchema, DomainResponseSchema
 
 
 @final
@@ -16,4 +17,15 @@ class CommonPresentationMapper:
             minute_of_hour=dto.minute_of_hour,
             call_count=dto.call_count,
 
+        )
+
+
+@final
+@dataclass(frozen=True, slots=True)
+class DomainPresentationMapper:
+    @staticmethod
+    def to_response(dto: DomainDTO) -> DomainResponseSchema:
+        return DomainResponseSchema(
+            domain_uuid=dto.domain_uuid,
+            domain_name=dto.domain_name,
         )

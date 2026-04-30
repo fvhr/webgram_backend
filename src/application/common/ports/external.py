@@ -9,7 +9,7 @@ from src.application.common.dtos.system_resources import RAMDTO, CPUDTO, DiskDTO
 from src.application.extensions.dtos.extension import ExtensionAtcDTO
 from src.application.queues.dtos.queue import QueueAtcDTO
 from src.domain.domain.entities.domain import Domain
-from src.domain.enums import WebsocketMessageTypes, WebsocketConnectionTypes
+from src.domain.enums import WebsocketMessageTypes, WebsocketRoles
 
 
 class AtcGatewayProtocol(Protocol):
@@ -40,8 +40,16 @@ class AtcGatewayProtocol(Protocol):
 
 class WebSocketManagerProtocol(Protocol):
     @abstractmethod
-    async def broadcast_message(self, type_message: WebsocketMessageTypes, data: dict,
-                                connection_type: WebsocketConnectionTypes) -> None:
+    async def broadcast_message_to_role(self, type_message: WebsocketMessageTypes, data: dict,
+                                        ws_role: WebsocketRoles) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def upgrade_agent_socket(self, agent_uuid: str) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def personal_to_agent(self, type_message: WebsocketMessageTypes, data: dict, agent_uuid: str) -> None:
         raise NotImplementedError
 
 
