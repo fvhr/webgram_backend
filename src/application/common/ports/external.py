@@ -30,7 +30,7 @@ class AtcGatewayProtocol(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_atc_history_agent_by_day(self, agent_number: str) -> list[AgentHistoryDTO]:
+    async def get_atc_history_agent_by_day(self, agent_number: str, agent_uuid: str) -> list[AgentHistoryDTO]:
         raise NotImplementedError
 
     @abstractmethod

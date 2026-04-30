@@ -86,26 +86,25 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
                 f'Failed to retrieve atc queues: {e}'
             ) from e
 
-    async def get_atc_history_agent_by_day(self, agent_number: str) -> list[AgentHistoryDTO]:
+    async def get_atc_history_agent_by_day(self, agent_number: str, agent_uuid: str) -> list[AgentHistoryDTO]:
         try:
             stmt = text('''
-            SELECT
-                start_stamp, 
-                TO_CHAR(
-                    (EXTRACT(EPOCH FROM (end_stamp - start_stamp)) || ' seconds')::INTERVAL,
-                    'MI:SS'
-                ) AS duration,
-                direction, 
-                caller_id_number,  
-                destination_number 
-            FROM v_xml_cdr 
-            WHERE 
-                (caller_id_number = :agent_number OR destination_number = :agent_number)
-                AND direction IN ('inbound', 'outbound')  
-                AND start_stamp >= NOW() - INTERVAL '1 day' 
-            ORDER BY start_stamp DESC;
-            ''')
-            params = {'agent_number': agent_number}
+                        SELECT start_stamp,
+                               TO_CHAR(
+                                       (EXTRACT(EPOCH FROM (end_stamp - start_stamp)) || ' seconds'):: INTERVAL,
+                                       'MI:SS'
+                               ) AS duration,
+                               direction,
+                               caller_id_number,
+                               destination_number
+                        FROM v_xml_cdr
+                        WHERE (caller_id_number = :agent_number OR destination_number = :agent_number
+                            OR cc_agent = :agent_uuid)
+                          AND direction IN ('inbound', 'outbound', 'local')
+                          AND start_stamp >= NOW() - INTERVAL '1 day'
+                        ORDER BY start_stamp DESC;
+                        ''')
+            params = {'agent_number': agent_number, 'agent_uuid': agent_uuid}
             result = await self.session.execute(stmt, params=params)
             history_models = result.all()
             return [self.agent_mapper.to_history_dto(history_model) for history_model in history_models]
@@ -119,45 +118,34 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
         CDREveryMinute]:
         try:
             stmt = text('''
-            WITH RECURSIVE call_minutes AS (
-                SELECT
-                        xml_cdr_uuid,
-                        date_trunc('minute', start_stamp) AS current_minute,
-                        date_trunc('minute', COALESCE(end_stamp, NOW())) AS end_minute
-                      FROM
-                        v_xml_cdr
-                      WHERE
-                        start_stamp >= :start_date
-                        AND end_stamp < :end_date
-                        AND (
-                            end_stamp IS NOT NULL
-                            OR end_stamp IS NULL
-                        )
-                      UNION ALL
-                      SELECT
-                        xml_cdr_uuid,
-                        current_minute + INTERVAL '1 minute' AS current_minute,
-                        end_minute
-                      FROM
-                        call_minutes
-                      WHERE
-                        current_minute < end_minute
-                    )
-                    SELECT
-                      EXTRACT(HOUR FROM current_minute)::TEXT AS hour_of_day,
-                      EXTRACT(MINUTE FROM current_minute)::TEXT AS minute_of_hour,
-                      COUNT(xml_cdr_uuid) AS call_count
-                    FROM
-                      call_minutes
-                    WHERE
-                      current_minute >= :start_date
-                      AND current_minute < :end_date
-                    GROUP BY
-                      EXTRACT(HOUR FROM current_minute),
-                      EXTRACT(MINUTE FROM current_minute)
-                    ORDER BY
-                      hour_of_day, minute_of_hour;
-            ''')
+                        WITH RECURSIVE
+                            call_minutes AS (SELECT xml_cdr_uuid,
+                                                    date_trunc('minute', start_stamp)                AS current_minute,
+                                                    date_trunc('minute', COALESCE(end_stamp, NOW())) AS end_minute
+                                             FROM v_xml_cdr
+                                             WHERE start_stamp >= :start_date
+                                               AND end_stamp < :end_date
+                                               AND (
+                                                 end_stamp IS NOT NULL
+                                                     OR end_stamp IS NULL
+                                                 )
+                                             UNION ALL
+                                             SELECT xml_cdr_uuid,
+                                                    current_minute + INTERVAL '1 minute' AS current_minute, end_minute
+                        FROM
+                            call_minutes
+                        WHERE
+                            current_minute
+                            < end_minute
+                            )
+                        SELECT EXTRACT(HOUR FROM current_minute)::TEXT AS hour_of_day, EXTRACT(MINUTE FROM current_minute)::TEXT AS minute_of_hour, COUNT(xml_cdr_uuid) AS call_count
+                        FROM call_minutes
+                        WHERE current_minute >= :start_date
+                          AND current_minute < :end_date
+                        GROUP BY EXTRACT(HOUR FROM current_minute),
+                                 EXTRACT(MINUTE FROM current_minute)
+                        ORDER BY hour_of_day, minute_of_hour;
+                        ''')
             params = {'start_date': start_date, 'end_date': end_date}
             result = await self.session.execute(stmt, params=params)
             cdr_count_models = result.all()
