@@ -153,9 +153,11 @@ class AgentUseCaseProvider(Provider):
     async def get_history_agent_by_day_use_case(
             self,
             atc_gateway: AtcGatewayProtocol,
+            agent_repository: AgentRepositoryProtocol,
     ) -> GetHistoryAgentByDayUseCase:
         return GetHistoryAgentByDayUseCase(
             _atc_gateway=atc_gateway,
+            _agent_repository=agent_repository,
         )
 
     @provide(scope=Scope.REQUEST)
