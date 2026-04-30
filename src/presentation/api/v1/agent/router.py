@@ -11,6 +11,7 @@ from src.application.agents.use_cases.set_queues import SetQueuesUseCase
 from src.application.agents.use_cases.set_status import SetStatusUseCase
 from src.application.agents.use_cases.set_user import SetUserUseCase
 from src.application.agents.use_cases.spy_agent import SpyAgentUseCase
+from src.application.agents.use_cases.upgrade_socket import UpgradeSocketUseCase
 from src.application.user.use_cases.users.get_user import GetUserUseCase
 from src.presentation.api.v1.agent.mappers import AgentPresentationMapper
 from src.presentation.api.v1.agent.schemas.responses import AgentResponseSchema, AgentFreeResponseSchema, \
@@ -78,3 +79,9 @@ async def get_history_by_day(agent_number: str, use_case: FromDishka[GetHistoryA
     AgentHistoryResponseSchema]:
     agent_history_dtos = await use_case(agent_number)
     return [AgentPresentationMapper.to_history_response(agent_history_dto) for agent_history_dto in agent_history_dtos]
+
+
+@agent_router.post('/upgrade-socket/{agent_uuid}')
+@inject
+async def upgrade_socket(agent_uuid: str, use_case: FromDishka[UpgradeSocketUseCase]) -> None:
+    await use_case(agent_uuid)

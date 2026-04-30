@@ -6,7 +6,7 @@ from src.application.common.dtos.event import EventDTO
 from src.application.common.event_handler import EventHandler
 from src.application.common.ports.external import WebSocketManagerProtocol
 from src.application.common.ports.mapper import EventDtoEntityMapperProtocol
-from src.domain.enums import WebsocketMessageTypes, WebsocketConnectionTypes
+from src.domain.enums import WebsocketMessageTypes, WebsocketRoles
 from src.domain.events.entities.base_event import EventTypes
 
 
@@ -24,8 +24,10 @@ class AgentStatusChangeEventHandler(EventHandler):
                 agent = await self._agent_repository.change_status_agent(custom_event.event_agent_uuid,
                                                                          custom_event.event_agent_status)
                 agent_dict = self._agent_mapper.to_dict(agent)
-                await self._ws_manager.broadcast_message(WebsocketMessageTypes.AGENT_DATA, agent_dict,
-                                                         WebsocketConnectionTypes.OPERATOR_PANEL)
+                await self._ws_manager.personal_to_agent(WebsocketMessageTypes.AGENT_DATA, agent_dict,
+                                                         str(agent.agent_uuid))
+                await self._ws_manager.broadcast_message_to_role(WebsocketMessageTypes.AGENT_DATA, agent_dict,
+                                                                 WebsocketRoles.ADMIN)
 
     @property
     def get_event_names(self) -> list:

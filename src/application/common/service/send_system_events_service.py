@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from src.application.common.ports.external import GetSystemResourcesProtocol, WebSocketManagerProtocol
 from src.application.common.ports.mapper import SystemEventsDtoDictMapperProtocol
-from src.domain.enums import WebsocketMessageTypes, WebsocketConnectionTypes
+from src.domain.enums import WebsocketMessageTypes, WebsocketRoles
 
 
 @dataclass
@@ -16,5 +16,5 @@ class SendSystemEventsService:
         cpu_dto = await self._system_resources.get_cpu()
         disk_dto = await self._system_resources.get_disk()
         data = self._mapper.to_dict(ram_dto, cpu_dto, disk_dto)
-        await self._ws_manager.broadcast_message(WebsocketMessageTypes.SYSTEM_RESOURCES_MONITORING, data,
-                                                 WebsocketConnectionTypes.DASHBOARD)
+        await self._ws_manager.broadcast_message_to_role(WebsocketMessageTypes.SYSTEM_RESOURCES_MONITORING, data,
+                                                 WebsocketRoles.DASHBOARD)
