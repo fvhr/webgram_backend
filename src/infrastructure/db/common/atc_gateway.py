@@ -100,8 +100,7 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
                 destination_number 
             FROM v_xml_cdr 
             WHERE 
-                (caller_id_number = :agent_number OR destination_number = :agent_number)
-                AND direction IN ('inbound', 'outbound')  
+                (caller_id_number = :agent_number OR destination_number = :agent_number) 
                 AND start_stamp >= NOW() - INTERVAL '1 day' 
             ORDER BY start_stamp DESC;
             ''')
