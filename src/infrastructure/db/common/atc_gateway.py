@@ -165,10 +165,10 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
                         ''')
             params = {'call_uuid': call_uuid, }
             result = await self.session.execute(stmt, params=params)
-            cdr_model = result.scalar_one_or_none()
-            if not cdr_model:
+            record_path = result.scalar_one_or_none()
+            if not record_path:
                 return None
-            return cdr_model.record_path
+            return record_path
         except SQLAlchemyError as e:
             logger.critical(f'Failed to retrieve record_path: {e}')
             raise RepositoryError(
