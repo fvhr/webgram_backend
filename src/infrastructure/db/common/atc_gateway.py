@@ -168,7 +168,7 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
             cdr_model = result.first()
             if not cdr_model:
                 return None
-            return cdr_model.record_path + cdr_model.record_name
+            return cdr_model.record_path + '/' + cdr_model.record_name
         except SQLAlchemyError as e:
             logger.critical(f'Failed to retrieve record_path: {e}')
             raise RepositoryError(
