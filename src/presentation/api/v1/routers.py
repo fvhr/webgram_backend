@@ -16,7 +16,7 @@ from src.presentation.api.v1.schemas.responses import CdrEveryMinuteResponseSche
 from src.presentation.api.v1.user.auth.router import auth_router
 from src.presentation.api.v1.user.role.router import role_router
 from src.presentation.api.v1.user.user.router import user_admin_router, user_public_router
-from src.presentation.api.v1.utils import require_roles
+from src.presentation.api.v1.utils import require_roles, require_authorization
 
 api_router = APIRouter(prefix='/backend/api/v1', tags=['API v1'])
 
@@ -30,7 +30,7 @@ async def get_cdr_count_every_minute(year: int, month: int, day: int, use_case: 
     return [CommonPresentationMapper.to_cdr_count_every_minute_response(dto) for dto in cdr_count_every_minute_dtos]
 
 
-@api_router.get('/record/{call_uuid}')
+@api_router.get('/record/{call_uuid}', dependencies=[Depends(require_authorization)])
 @inject
 async def get_record(call_uuid: UUID, use_case: FromDishka[GetCDRRecordUseCase]) -> FileResponse:
     record_path = await use_case(str(call_uuid))
