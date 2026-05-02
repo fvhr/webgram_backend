@@ -37,6 +37,10 @@ class AtcGatewayProtocol(Protocol):
     async def get_count_cdr_every_minute(self, start_date: datetime, end_date: datetime) -> list[CDREveryMinute]:
         raise NotImplementedError
 
+    @abstractmethod
+    async def get_record_path(self, call_uuid: str) -> str | None:
+        raise NotImplementedError
+
 
 class WebSocketManagerProtocol(Protocol):
     @abstractmethod

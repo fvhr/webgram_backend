@@ -1,8 +1,12 @@
+from uuid import UUID
+
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject
 from fastapi import APIRouter
 from fastapi.params import Depends
+from fastapi.responses import FileResponse
 
+from src.application.common.use_cases.get_cdr_record import GetCDRRecordUseCase
 from src.application.common.use_cases.get_count_cdr_every_minute import GetCountCDREveryMinute
 from src.presentation.api.v1.agent.router import agent_router, agent_operator_router
 from src.presentation.api.v1.mappers import CommonPresentationMapper
@@ -24,6 +28,13 @@ async def get_cdr_count_every_minute(year: int, month: int, day: int, use_case: 
         list[CdrEveryMinuteResponseSchema]:
     cdr_count_every_minute_dtos = await use_case(year, month, day)
     return [CommonPresentationMapper.to_cdr_count_every_minute_response(dto) for dto in cdr_count_every_minute_dtos]
+
+
+@api_router.get('/record/{call_uuid}', response_model=FileResponse)
+@inject
+async def get_record(call_uuid: UUID, use_case: FromDishka[GetCDRRecordUseCase]) -> FileResponse:
+    record_path = await use_case(str(call_uuid))
+    return FileResponse(path=record_path, stat_result=None)
 
 
 api_router.include_router(role_router)

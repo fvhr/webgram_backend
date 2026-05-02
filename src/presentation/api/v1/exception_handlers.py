@@ -38,6 +38,16 @@ def setup_exception_handlers(app: FastAPI) -> None:
             content={'message': str(exc)},
         )
 
+    @app.exception_handler(FileNotFoundError)
+    async def file_not_found_error_api_exception_handler(
+            request: Request,
+            exc: FileNotFoundError,
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={'message': str(exc)},
+        )
+
     @app.exception_handler(AlreadyExistsError)
     async def already_exists_error_api_exception_handler(
             request: Request,

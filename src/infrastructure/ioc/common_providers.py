@@ -22,6 +22,7 @@ from src.application.common.service.collect_handlers_service import CollectHandl
 from src.application.common.service.get_calls_service import GetCallsService
 from src.application.common.service.send_call_count_event_service import SendCallCountService
 from src.application.common.service.send_system_events_service import SendSystemEventsService
+from src.application.common.use_cases.get_cdr_record import GetCDRRecordUseCase
 from src.application.common.use_cases.get_count_cdr_every_minute import GetCountCDREveryMinute
 from src.application.domain.event_handlers.heartbeat import DomainHeartbeatEventHandler
 from src.application.extensions.event_handlers.heartbeat import ExtensionHeartbeatEventHandler
@@ -237,6 +238,15 @@ class CommonUseCaseProvider(Provider):
         return GetCountCDREveryMinute(
             _redis=redis,
             _mapper=mapper,
+            _atc_gateway=atc_gateway,
+        )
+
+    @provide(scope=Scope.REQUEST)
+    async def get_cdr_record_use_case(
+            self,
+            atc_gateway: AtcGatewayProtocol,
+    ) -> GetCDRRecordUseCase:
+        return GetCDRRecordUseCase(
             _atc_gateway=atc_gateway,
         )
 

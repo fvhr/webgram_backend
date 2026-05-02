@@ -155,3 +155,22 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
             raise RepositoryError(
                 f'Failed to retrieve count cdr every minute: {e}'
             ) from e
+
+    async def get_record_path(self, call_uuid: str) -> str | None:
+        try:
+            stmt = text('''
+                        SELECT record_path
+                        FROM v_xml_cdr
+                        WHERE xml_cdr_uuid = :call_uuid
+                        ''')
+            params = {'call_uuid': call_uuid, }
+            result = await self.session.execute(stmt, params=params)
+            cdr_model = result.scalar_one_or_none()
+            if not cdr_model:
+                return None
+            return cdr_model.record_path
+        except SQLAlchemyError as e:
+            logger.critical(f'Failed to retrieve record_path: {e}')
+            raise RepositoryError(
+                f'Failed to retrieve record_path: {e}'
+            ) from e
