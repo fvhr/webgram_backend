@@ -159,16 +159,16 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
     async def get_record_path(self, call_uuid: str) -> str | None:
         try:
             stmt = text('''
-                        SELECT record_path
+                        SELECT record_path, record_name
                         FROM v_xml_cdr
                         WHERE xml_cdr_uuid = :call_uuid
                         ''')
             params = {'call_uuid': call_uuid, }
             result = await self.session.execute(stmt, params=params)
-            record_path = result.scalar_one_or_none()
-            if not record_path:
+            cdr_model = result.scalar_one_or_none()
+            if not cdr_model:
                 return None
-            return record_path
+            return cdr_model.record_path + cdr_model.record_name
         except SQLAlchemyError as e:
             logger.critical(f'Failed to retrieve record_path: {e}')
             raise RepositoryError(
