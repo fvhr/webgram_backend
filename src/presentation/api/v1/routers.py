@@ -34,7 +34,7 @@ async def get_cdr_count_every_minute(year: int, month: int, day: int, use_case: 
 @inject
 async def get_record(call_uuid: UUID, use_case: FromDishka[GetCDRRecordUseCase]) -> FileResponse:
     record_path = await use_case(str(call_uuid))
-    return FileResponse(path=record_path)
+    return FileResponse(path=record_path, media_type="audio/wav")
 
 
 api_router.include_router(role_router)
