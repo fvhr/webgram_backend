@@ -1,5 +1,5 @@
 from dishka import Provider, Scope, provide
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.application.common.ports.external import AtcGatewayProtocol
 from src.application.queues.event_handlers.heartbeat import QueueHeartbeatEventHandler
@@ -17,14 +17,14 @@ from src.infrastructure.db.queue.views.queue import ViewQueueRepositorySQLAlchem
 
 class QueueRepositoryProvider(Provider):
     @provide(scope=Scope.SESSION)
-    async def get_queue_repository(self, session: AsyncSession, db_mapper: QueueDBMapper) \
+    async def get_queue_repository(self, session_maker: async_sessionmaker[AsyncSession], db_mapper: QueueDBMapper) \
             -> QueueRepositoryProtocol:
-        return QueueRepositorySQLAlchemy(session=session, mapper=db_mapper)
+        return QueueRepositorySQLAlchemy(session_maker=session_maker, mapper=db_mapper)
 
     @provide(scope=Scope.SESSION)
-    async def get_view_queue_repository(self, session: AsyncSession, db_mapper: QueueDBMapper) \
+    async def get_view_queue_repository(self, session_maker: async_sessionmaker[AsyncSession], db_mapper: QueueDBMapper) \
             -> ViewQueueRepositoryProtocol:
-        return ViewQueueRepositorySQLAlchemy(session=session, mapper=db_mapper)
+        return ViewQueueRepositorySQLAlchemy(session_maker=session_maker, mapper=db_mapper)
 
 
 class QueueMapperProvider(Provider):

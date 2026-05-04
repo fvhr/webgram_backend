@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.application.agents.dtos.agent import AgentAtcDTO, AgentHistoryDTO
 from src.application.common.dtos.cdr import CDREveryMinute
@@ -23,7 +23,7 @@ from src.settings import Settings
 
 @dataclass
 class SqlAlchemyAtcGateway(AtcGatewayProtocol):
-    session: AsyncSession
+    session_maker: async_sessionmaker[AsyncSession]
     settings: Settings
     domain_mapper: DomainGatewayDBMapper
     agent_mapper: AgentGatewayDBMapper
@@ -33,145 +33,130 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
 
     async def get_atc_domains(self) -> list[Domain]:
         try:
-            stmt = text(
-                f"select domain_uuid, domain_name, domain_enabled, domain_description from {self.settings.DOMAIN_ATC_TABLE_NAME}")
-            result = await self.session.execute(stmt)
-            domain_models = result.all()
-            return [self.domain_mapper.to_entity(domain_model) for domain_model in domain_models]
+            async with self.session_maker() as session:
+                stmt = text(f"select domain_uuid, domain_name, domain_enabled, domain_description from {self.settings.DOMAIN_ATC_TABLE_NAME}")
+                result = await session.execute(stmt)
+                domain_models = result.all()
+                return [self.domain_mapper.to_entity(domain_model) for domain_model in domain_models]
         except SQLAlchemyError as e:
             logger.critical(f'Failed to retrieve atc domains: {e}')
-            raise RepositoryError(
-                f'Failed to retrieve atc domains: {e}'
-            ) from e
+            raise RepositoryError(f'Failed to retrieve atc domains: {e}') from e
 
     async def get_atc_agents(self) -> list[AgentAtcDTO]:
         try:
-            stmt = text(
-                f"select call_center_agent_uuid, agent_name, agent_id, "
-                f"agent_password, domain_uuid from {self.settings.AGENT_ATC_TABLE_NAME}")
-            result = await self.session.execute(stmt)
-            agent_models = result.all()
-            return [self.agent_mapper.to_entity(agent_model) for agent_model in agent_models]
+            async with self.session_maker() as session:
+                stmt = text(f"select call_center_agent_uuid, agent_name, agent_id, agent_password, domain_uuid from {self.settings.AGENT_ATC_TABLE_NAME}")
+                result = await session.execute(stmt)
+                agent_models = result.all()
+                return [self.agent_mapper.to_entity(agent_model) for agent_model in agent_models]
         except SQLAlchemyError as e:
             logger.critical(f'Failed to retrieve atc agents: {e}')
-            raise RepositoryError(
-                f'Failed to retrieve atc agents: {e}'
-            ) from e
+            raise RepositoryError(f'Failed to retrieve atc agents: {e}') from e
 
     async def get_atc_extensions(self) -> list[ExtensionAtcDTO]:
         try:
-            stmt = text(
-                f"select extension_uuid, extension, password, effective_caller_id_name, "
-                f"effective_caller_id_number, domain_uuid from {self.settings.EXTENSION_ATC_TABLE_NAME}")
-            result = await self.session.execute(stmt)
-            extension_models = result.all()
-            return [self.extension_mapper.to_entity(extension_model) for extension_model in extension_models]
+            async with self.session_maker() as session:
+                stmt = text(f"select extension_uuid, extension, password, effective_caller_id_name, effective_caller_id_number, domain_uuid from {self.settings.EXTENSION_ATC_TABLE_NAME}")
+                result = await session.execute(stmt)
+                extension_models = result.all()
+                return [self.extension_mapper.to_entity(extension_model) for extension_model in extension_models]
         except SQLAlchemyError as e:
             logger.critical(f'Failed to retrieve atc extensions: {e}')
-            raise RepositoryError(
-                f'Failed to retrieve atc extensions: {e}'
-            ) from e
+            raise RepositoryError(f'Failed to retrieve atc extensions: {e}') from e
 
     async def get_atc_queues(self) -> list[QueueAtcDTO]:
         try:
-            stmt = text(
-                f"select call_center_queue_uuid, queue_name, queue_extension, "
-                f"domain_uuid from {self.settings.QUEUE_ATC_TABLE_NAME}")
-            result = await self.session.execute(stmt)
-            queue_models = result.all()
-            return [self.queue_mapper.to_entity(queue_model) for queue_model in queue_models]
+            async with self.session_maker() as session:
+                stmt = text(f"select call_center_queue_uuid, queue_name, queue_extension, domain_uuid from {self.settings.QUEUE_ATC_TABLE_NAME}")
+                result = await session.execute(stmt)
+                queue_models = result.all()
+                return [self.queue_mapper.to_entity(queue_model) for queue_model in queue_models]
         except SQLAlchemyError as e:
             logger.critical(f'Failed to retrieve atc queues: {e}')
-            raise RepositoryError(
-                f'Failed to retrieve atc queues: {e}'
-            ) from e
+            raise RepositoryError(f'Failed to retrieve atc queues: {e}') from e
 
     async def get_atc_history_agent_by_day(self, agent_number: str, agent_uuid: str) -> list[AgentHistoryDTO]:
         try:
-            stmt = text('''
-                        SELECT xml_cdr_uuid,
-                               start_stamp,
-                               TO_CHAR(
-                                       (EXTRACT(EPOCH FROM (end_stamp - start_stamp)) || ' seconds'):: INTERVAL,
-                                       'MI:SS'
-                               ) AS duration,
-                               direction,
-                               caller_id_number,
-                               destination_number
-                        FROM v_xml_cdr
-                        WHERE (caller_id_number = :agent_number OR destination_number = :agent_number
-                            OR cc_agent = :agent_uuid)
-                          AND direction IN ('inbound', 'outbound', 'local')
-                          AND start_stamp >= NOW() - INTERVAL '1 day'
-                        ORDER BY start_stamp DESC;
-                        ''')
-            params = {'agent_number': agent_number, 'agent_uuid': agent_uuid}
-            result = await self.session.execute(stmt, params=params)
-            history_models = result.all()
-            return [self.agent_mapper.to_history_dto(history_model) for history_model in history_models]
+            async with self.session_maker() as session:
+                stmt = text('''
+                            SELECT xml_cdr_uuid,
+                                   start_stamp,
+                                   TO_CHAR(
+                                           (EXTRACT(EPOCH FROM (end_stamp - start_stamp)) || ' seconds'):: INTERVAL,
+                                           'MI:SS'
+                                   ) AS duration,
+                                   direction,
+                                   caller_id_number,
+                                   destination_number
+                            FROM v_xml_cdr
+                            WHERE (caller_id_number = :agent_number OR destination_number = :agent_number
+                                OR cc_agent = :agent_uuid)
+                              AND direction IN ('inbound', 'outbound', 'local')
+                              AND start_stamp >= NOW() - INTERVAL '1 day'
+                            ORDER BY start_stamp DESC;
+                            ''')
+                params = {'agent_number': agent_number, 'agent_uuid': agent_uuid}
+                result = await session.execute(stmt, params=params)
+                history_models = result.all()
+                return [self.agent_mapper.to_history_dto(history_model) for history_model in history_models]
         except SQLAlchemyError as e:
             logger.critical(f'Failed to retrieve atc history agent by day: {e}')
-            raise RepositoryError(
-                f'Failed to retrieve atc history agent by day: {e}'
-            ) from e
+            raise RepositoryError(f'Failed to retrieve atc history agent by day: {e}') from e
 
-    async def get_count_cdr_every_minute(self, start_date: datetime.datetime, end_date: datetime.datetime) -> list[
-        CDREveryMinute]:
+    async def get_count_cdr_every_minute(self, start_date: datetime.datetime, end_date: datetime.datetime) -> list[CDREveryMinute]:
         try:
-            stmt = text('''
-                        WITH RECURSIVE
-                            call_minutes AS (SELECT xml_cdr_uuid,
-                                                    date_trunc('minute', start_stamp)                AS current_minute,
-                                                    date_trunc('minute', COALESCE(end_stamp, NOW())) AS end_minute
-                                             FROM v_xml_cdr
-                                             WHERE start_stamp >= :start_date
-                                               AND end_stamp < :end_date
-                                               AND (
-                                                 end_stamp IS NOT NULL
-                                                     OR end_stamp IS NULL
-                                                 )
-                                             UNION ALL
-                                             SELECT xml_cdr_uuid,
-                                                    current_minute + INTERVAL '1 minute' AS current_minute, end_minute
-                        FROM
-                            call_minutes
-                        WHERE
-                            current_minute
-                            < end_minute
-                            )
-                        SELECT EXTRACT(HOUR FROM current_minute)::TEXT AS hour_of_day, EXTRACT(MINUTE FROM current_minute)::TEXT AS minute_of_hour, COUNT(xml_cdr_uuid) AS call_count
-                        FROM call_minutes
-                        WHERE current_minute >= :start_date
-                          AND current_minute < :end_date
-                        GROUP BY EXTRACT(HOUR FROM current_minute),
-                                 EXTRACT(MINUTE FROM current_minute)
-                        ORDER BY hour_of_day, minute_of_hour;
-                        ''')
-            params = {'start_date': start_date, 'end_date': end_date}
-            result = await self.session.execute(stmt, params=params)
-            cdr_count_models = result.all()
-            return [self.cdr_mapper.to_dto(cdr_model) for cdr_model in cdr_count_models]
+            async with self.session_maker() as session:
+                stmt = text('''
+                            WITH RECURSIVE
+                                call_minutes AS (SELECT xml_cdr_uuid,
+                                                        date_trunc('minute', start_stamp)                AS current_minute,
+                                                        date_trunc('minute', COALESCE(end_stamp, NOW())) AS end_minute
+                                                 FROM v_xml_cdr
+                                                 WHERE start_stamp >= :start_date
+                                                   AND end_stamp < :end_date
+                                                   AND (
+                                                     end_stamp IS NOT NULL
+                                                         OR end_stamp IS NULL
+                                                     )
+                                                 UNION ALL
+                                                 SELECT xml_cdr_uuid,
+                                                        current_minute + INTERVAL '1 minute' AS current_minute, end_minute
+                            FROM
+                                call_minutes
+                            WHERE
+                                current_minute
+                                < end_minute
+                                )
+                            SELECT EXTRACT(HOUR FROM current_minute)::TEXT AS hour_of_day, EXTRACT(MINUTE FROM current_minute)::TEXT AS minute_of_hour, COUNT(xml_cdr_uuid) AS call_count
+                            FROM call_minutes
+                            WHERE current_minute >= :start_date
+                              AND current_minute < :end_date
+                            GROUP BY EXTRACT(HOUR FROM current_minute),
+                                     EXTRACT(MINUTE FROM current_minute)
+                            ORDER BY hour_of_day, minute_of_hour;
+                            ''')
+                params = {'start_date': start_date, 'end_date': end_date}
+                result = await session.execute(stmt, params=params)
+                cdr_count_models = result.all()
+                return [self.cdr_mapper.to_dto(cdr_model) for cdr_model in cdr_count_models]
         except SQLAlchemyError as e:
             logger.critical(f'Failed to retrieve count cdr every minute: {e}')
-            raise RepositoryError(
-                f'Failed to retrieve count cdr every minute: {e}'
-            ) from e
+            raise RepositoryError(f'Failed to retrieve count cdr every minute: {e}') from e
 
     async def get_record_path(self, call_uuid: str) -> str | None:
         try:
-            stmt = text('''
-                        SELECT record_path, record_name
-                        FROM v_xml_cdr
-                        WHERE xml_cdr_uuid = :call_uuid
-                        ''')
-            params = {'call_uuid': call_uuid, }
-            result = await self.session.execute(stmt, params=params)
-            cdr_model = result.first()
-            if not cdr_model or not cdr_model.record_path or not cdr_model.record_name:
-                return None
-            return cdr_model.record_path + '/' + cdr_model.record_name
+            async with self.session_maker() as session:
+                stmt = text('''
+                            SELECT record_path, record_name
+                            FROM v_xml_cdr
+                            WHERE xml_cdr_uuid = :call_uuid
+                            ''')
+                params = {'call_uuid': call_uuid}
+                result = await session.execute(stmt, params=params)
+                cdr_model = result.first()
+                if not cdr_model or not cdr_model.record_path or not cdr_model.record_name:
+                    return None
+                return cdr_model.record_path + '/' + cdr_model.record_name
         except SQLAlchemyError as e:
             logger.critical(f'Failed to retrieve record_path: {e}')
-            raise RepositoryError(
-                f'Failed to retrieve record_path: {e}'
-            ) from e
+            raise RepositoryError(f'Failed to retrieve record_path: {e}') from e

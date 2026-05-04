@@ -1,5 +1,5 @@
 from dishka import provide, Scope, Provider
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.application.user.mappers import RoleDTOMapper
 from src.application.user.ports.mappers import RoleDtoEntityMapperProtocol
@@ -16,9 +16,9 @@ from src.infrastructure.db.user.repositories.role import RoleRepositorySQLAlchem
 class RoleRepositoryProvider(Provider):
     @provide(scope=Scope.SESSION)
     async def get_role_repository(
-            self, session: AsyncSession, db_mapper: RoleDBMapper
+            self, session_maker: async_sessionmaker[AsyncSession], db_mapper: RoleDBMapper
     ) -> RoleRepositoryProtocol:
-        return RoleRepositorySQLAlchemy(session=session, mapper=db_mapper)
+        return RoleRepositorySQLAlchemy(session_maker=session_maker, mapper=db_mapper)
 
 
 class RoleMapperProvider(Provider):

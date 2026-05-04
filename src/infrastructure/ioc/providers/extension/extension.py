@@ -1,5 +1,5 @@
 from dishka import Provider, Scope, provide
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.application.common.ports.external import AtcGatewayProtocol
 from src.application.extensions.event_handlers.heartbeat import ExtensionHeartbeatEventHandler
@@ -14,9 +14,9 @@ from src.infrastructure.db.extension.repositories.extension import ExtensionRepo
 
 class ExtensionRepositoryProvider(Provider):
     @provide(scope=Scope.SESSION)
-    async def get_extension_repository(self, session: AsyncSession, db_mapper: ExtensionDBMapper) \
+    async def get_extension_repository(self, session_maker: async_sessionmaker[AsyncSession], db_mapper: ExtensionDBMapper) \
             -> ExtensionRepositoryProtocol:
-        return ExtensionRepositorySQLAlchemy(session=session, mapper=db_mapper)
+        return ExtensionRepositorySQLAlchemy(session_maker=session_maker, mapper=db_mapper)
 
 
 class ExtensionMapperProvider(Provider):

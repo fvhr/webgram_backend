@@ -1,5 +1,5 @@
 from dishka import Provider, Scope, provide
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.application.user.mappers import UserDTOMapper
 from src.application.user.ports.auth import AuthentificationProtocol
@@ -28,14 +28,14 @@ from src.settings import Settings
 
 class UserRepositoryProvider(Provider):
     @provide(scope=Scope.SESSION)
-    async def get_user_repository(self, session: AsyncSession, db_mapper: UserDBMapper) \
+    async def get_user_repository(self, session_maker: async_sessionmaker[AsyncSession], db_mapper: UserDBMapper) \
             -> UserRepositoryProtocol:
-        return UserRepositorySQLAlchemy(session=session, mapper=db_mapper)
+        return UserRepositorySQLAlchemy(session_maker=session_maker, mapper=db_mapper)
 
     @provide(scope=Scope.SESSION)
-    async def get_user_view_repository(self, session: AsyncSession, db_mapper: UserDBMapper) \
+    async def get_user_view_repository(self, session_maker: async_sessionmaker[AsyncSession], db_mapper: UserDBMapper) \
             -> ViewUserRepositoryProtocol:
-        return ViewUserRepositorySQLAlchemy(session=session, mapper=db_mapper)
+        return ViewUserRepositorySQLAlchemy(session_maker=session_maker, mapper=db_mapper)
 
 
 class UserMapperProvider(Provider):

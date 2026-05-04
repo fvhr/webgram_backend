@@ -1,5 +1,5 @@
 from dishka import Provider, Scope, provide
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.application.numbers.mappers import NumbersDTOMapper
 from src.application.numbers.ports.mappers import NumbersDtoEntityMapperProtocol
@@ -15,9 +15,9 @@ from src.infrastructure.db.numbers.repositories.number import NumberRepositorySQ
 class NumberRepositoryProvider(Provider):
     @provide(scope=Scope.REQUEST)
     async def get_number_repository(
-            self, session: AsyncSession, db_mapper: NumberDBMapper
+            self, session_maker: async_sessionmaker[AsyncSession], db_mapper: NumberDBMapper
     ) -> NumbersRepositoryProtocol:
-        return NumberRepositorySQLAlchemy(session=session, mapper=db_mapper)
+        return NumberRepositorySQLAlchemy(session_maker=session_maker, mapper=db_mapper)
 
 
 class NumberMapperProvider(Provider):

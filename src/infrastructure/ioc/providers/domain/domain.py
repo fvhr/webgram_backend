@@ -1,5 +1,5 @@
 from dishka import Provider, Scope, provide
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.application.common.ports.external import AtcGatewayProtocol
 from src.application.domain.event_handlers.heartbeat import DomainHeartbeatEventHandler
@@ -14,9 +14,9 @@ from src.infrastructure.db.domain.repositories.domain import DomainRepositorySQL
 
 class DomainRepositoryProvider(Provider):
     @provide(scope=Scope.SESSION)
-    async def get_domain_repository(self, session: AsyncSession, db_mapper: DomainDBMapper) \
+    async def get_domain_repository(self, session_maker: async_sessionmaker[AsyncSession], db_mapper: DomainDBMapper) \
             -> DomainRepositoryProtocol:
-        return DomainRepositorySQLAlchemy(session=session, mapper=db_mapper)
+        return DomainRepositorySQLAlchemy(session_maker=session_maker, mapper=db_mapper)
 
 
 class DomainMapperProvider(Provider):

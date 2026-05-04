@@ -3,7 +3,7 @@ from typing import final
 
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import selectinload
 
 from src.application.tiers.dtos.tier import ViewTierDTO
@@ -17,19 +17,20 @@ from src.logger import logger
 @final
 @dataclass(frozen=True, slots=True, kw_only=True)
 class ViewTierRepositorySQLAlchemy(ViewTierRepositoryProtocol):
-    session: AsyncSession
+    session_maker: async_sessionmaker[AsyncSession]
     mapper: TierDBMapper
 
     async def get_agent_tiers(self, agent_uuid: str) -> list[ViewTierDTO]:
         try:
-            stmt = select(TierModel).where(
-                TierModel.agent_uuid == agent_uuid).options(
-                selectinload(TierModel.queue).selectinload(QueueModel.domain)
-            )
-            result = await self.session.execute(stmt)
-            tier_models = result.scalars().all()
-            return [self.mapper.to_dto(tier_model)
-                    for tier_model in tier_models]
+            async with self.session_maker() as session:
+                stmt = select(TierModel).where(
+                    TierModel.agent_uuid == agent_uuid).options(
+                    selectinload(TierModel.queue).selectinload(QueueModel.domain)
+                )
+                result = await session.execute(stmt)
+                tier_models = result.scalars().all()
+                return [self.mapper.to_dto(tier_model)
+                        for tier_model in tier_models]
         except SQLAlchemyError as e:
             logger.critical(
                 f"Failed to retrieve tiers by agent_uuid '{agent_uuid}': {e}")

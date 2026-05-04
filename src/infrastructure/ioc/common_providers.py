@@ -60,13 +60,14 @@ class PasswordHashServiceProvider(Provider):
 
 class AtcGatewayProvider(Provider):
     @provide(scope=Scope.REQUEST)
-    def get_atc_gateway_provider(self, session: AsyncSession, domain_mapper: DomainGatewayDBMapper,
+    def get_atc_gateway_provider(self, session_maker: async_sessionmaker[AsyncSession],
+                                 domain_mapper: DomainGatewayDBMapper,
                                  agent_mapper: AgentGatewayDBMapper,
                                  extension_mapper: ExtensionGatewayDBMapper,
                                  queue_mapper: QueueGatewayDBMapper,
                                  cdr_mapper: CDREveryMinuteGatewayDBMapper,
                                  settings: Settings) -> AtcGatewayProtocol:
-        return SqlAlchemyAtcGateway(session=session, settings=settings,
+        return SqlAlchemyAtcGateway(session_maker=session_maker, settings=settings,
                                     domain_mapper=domain_mapper, agent_mapper=agent_mapper,
                                     extension_mapper=extension_mapper, queue_mapper=queue_mapper, cdr_mapper=cdr_mapper)
 
@@ -122,7 +123,7 @@ class DatabaseProvider(Provider):
             url=settings.DATABASE_URL,
             echo=False,
             pool_pre_ping=True,
-            pool_size=5,
+            pool_size=10,
             max_overflow=10,
             pool_recycle=300,
             connect_args=connect_args,
@@ -137,12 +138,12 @@ class DatabaseProvider(Provider):
             autocommit=False,
         )
 
-    @provide(scope=Scope.SESSION)
-    async def get_session(
-            self, session_maker: async_sessionmaker[AsyncSession]
-    ) -> AsyncIterator[AsyncSession]:
-        async with session_maker() as session:
-            yield session
+    # @provide(scope=Scope.SESSION)
+    # async def get_session(
+    #         self, session_maker: async_sessionmaker[AsyncSession]
+    # ) -> AsyncIterator[AsyncSession]:
+    #     async with session_maker() as session:
+    #         yield session
 
 
 class RedisProvider(Provider):

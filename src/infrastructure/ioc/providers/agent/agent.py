@@ -1,5 +1,5 @@
 from dishka import Provider, Scope, provide
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.application.agents.event_handlers.channel_create import ChannelCreateEventHandler
 from src.application.agents.event_handlers.status_change import AgentStatusChangeEventHandler
@@ -31,14 +31,14 @@ from src.infrastructure.db.queue.mappers.queue import QueueDBMapper
 
 class AgentRepositoryProvider(Provider):
     @provide(scope=Scope.SESSION)
-    async def get_agent_repository(self, session: AsyncSession, db_mapper: AgentDBMapper) \
+    async def get_agent_repository(self, session_maker: async_sessionmaker[AsyncSession], db_mapper: AgentDBMapper) \
             -> AgentRepositoryProtocol:
-        return AgentRepositorySQLAlchemy(session=session, mapper=db_mapper)
+        return AgentRepositorySQLAlchemy(session_maker=session_maker, mapper=db_mapper)
 
     @provide(scope=Scope.SESSION)
-    async def get_view_agent_repository(self, session: AsyncSession, db_mapper: AgentDBMapper) \
+    async def get_view_agent_repository(self, session_maker: async_sessionmaker[AsyncSession], db_mapper: AgentDBMapper) \
             -> ViewAgentRepositoryProtocol:
-        return ViewAgentRepositorySQLAlchemy(session=session, mapper=db_mapper)
+        return ViewAgentRepositorySQLAlchemy(session_maker=session_maker, mapper=db_mapper)
 
 
 class AgentMapperProvider(Provider):

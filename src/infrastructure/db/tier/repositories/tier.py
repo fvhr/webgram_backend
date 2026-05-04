@@ -3,7 +3,7 @@ from typing import final
 
 from sqlalchemy import select, delete
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.application.tiers.ports.repository import TierRepositoryProtocol
 from src.domain.tiers.entities.tier import Tier
@@ -16,45 +16,40 @@ from src.logger import logger
 @final
 @dataclass(frozen=True, slots=True, kw_only=True)
 class TierRepositorySQLAlchemy(TierRepositoryProtocol):
-    session: AsyncSession
+    session_maker: async_sessionmaker[AsyncSession]
     mapper: TierDBMapper
 
     async def create_tier(self, tier: Tier) -> Tier:
         try:
-            stmt = select(TierModel).where(
-                TierModel.agent_uuid == tier.agent_uuid,
-                TierModel.queue_uuid == tier.queue_uuid,
-            )
-            result = await self.session.execute(stmt)
-            model = result.scalar_one_or_none()
-            if model:
+            async with self.session_maker() as session:
+                stmt = select(TierModel).where(
+                    TierModel.agent_uuid == tier.agent_uuid,
+                    TierModel.queue_uuid == tier.queue_uuid,
+                )
+                result = await session.execute(stmt)
+                model = result.scalar_one_or_none()
+                if model:
+                    return self.mapper.to_entity(model)
+                model = self.mapper.to_model(tier)
+                session.add(model)
+                await session.commit()
                 return self.mapper.to_entity(model)
-            model = self.mapper.to_model(tier)
-            self.session.add(model)
-            await self.session.commit()
-            return self.mapper.to_entity(model)
         except IntegrityError as e:
-            logger.critical(
-                f"Conflict while saving tier '{tier}': {e}")
-            raise ConflictRepositoryError(
-                f"Conflict while saving tier '{tier}': {e}"
-            ) from e
+            logger.critical(f"Conflict while saving tier '{tier}': {e}")
+            raise ConflictRepositoryError(f"Conflict while saving tier '{tier}': {e}") from e
         except SQLAlchemyError as e:
             logger.critical(f"Failed to save tier '{tier}': {e}")
-            raise RepositoryError(
-                f"Failed to save tier '{tier}': {e}"
-            ) from e
+            raise RepositoryError(f"Failed to save tier '{tier}': {e}") from e
 
     async def delete_tier(self, agent_uuid: str, queue_uuid: str) -> None:
         try:
-            stmt = delete(TierModel).where(
-                TierModel.agent_uuid == agent_uuid,
-                TierModel.queue_uuid == queue_uuid,
-            )
-            await self.session.execute(stmt)
-            await self.session.commit()
+            async with self.session_maker() as session:
+                stmt = delete(TierModel).where(
+                    TierModel.agent_uuid == agent_uuid,
+                    TierModel.queue_uuid == queue_uuid,
+                )
+                await session.execute(stmt)
+                await session.commit()
         except SQLAlchemyError as e:
             logger.critical(f"Failed to delete tier '{agent_uuid}', '{queue_uuid}': {e}")
-            raise RepositoryError(
-                f"Failed to delete tier '{agent_uuid}', '{queue_uuid}': {e}"
-            ) from e
+            raise RepositoryError(f"Failed to delete tier '{agent_uuid}', '{queue_uuid}': {e}") from e
