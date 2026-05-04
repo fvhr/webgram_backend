@@ -30,7 +30,7 @@ async def get_cdr_count_every_minute(year: int, month: int, day: int, use_case: 
     return [CommonPresentationMapper.to_cdr_count_every_minute_response(dto) for dto in cdr_count_every_minute_dtos]
 
 
-@api_router.get('/record/{call_uuid}', dependencies=[Depends(require_authorization)])
+@api_router.get('/record/{call_uuid}', dependencies=[Depends(require_roles(['superadmin', 'supervisor']))])
 @inject
 async def get_record(call_uuid: UUID, use_case: FromDishka[GetCDRRecordUseCase]) -> FileResponse:
     record_path = await use_case(str(call_uuid))
