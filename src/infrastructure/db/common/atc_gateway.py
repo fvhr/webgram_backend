@@ -167,7 +167,7 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
             params = {'call_uuid': call_uuid, }
             result = await self.session.execute(stmt, params=params)
             cdr_model = result.first()
-            if not cdr_model:
+            if not cdr_model or not cdr_model.record_path or not cdr_model.record_name:
                 return None
             return cdr_model.record_path + '/' + cdr_model.record_name
         except SQLAlchemyError as e:
