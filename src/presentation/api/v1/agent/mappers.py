@@ -24,6 +24,7 @@ class AgentPresentationMapper:
     def to_history_response(dto: AgentHistoryDTO) -> AgentHistoryResponseSchema:
         """Convert Application DTO to API Response model."""
         return AgentHistoryResponseSchema(
+            call_uuid=dto.call_uuid,
             start_stamp=dto.start_stamp,
             duration=dto.duration,
             direction=dto.direction,

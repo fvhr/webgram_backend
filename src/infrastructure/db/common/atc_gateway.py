@@ -89,7 +89,8 @@ class SqlAlchemyAtcGateway(AtcGatewayProtocol):
     async def get_atc_history_agent_by_day(self, agent_number: str, agent_uuid: str) -> list[AgentHistoryDTO]:
         try:
             stmt = text('''
-                        SELECT start_stamp,
+                        SELECT xml_cdr_uuid,
+                               start_stamp,
                                TO_CHAR(
                                        (EXTRACT(EPOCH FROM (end_stamp - start_stamp)) || ' seconds'):: INTERVAL,
                                        'MI:SS'

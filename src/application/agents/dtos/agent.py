@@ -37,6 +37,7 @@ class AgentFreeDTO(DTO):
 
 @dataclass(frozen=True)
 class AgentHistoryDTO:
+    call_uuid: UUID
     start_stamp: datetime.datetime
     duration: str
     direction: str

@@ -24,6 +24,7 @@ class AgentResponseSchema(BaseModel):
 
 
 class AgentHistoryResponseSchema(BaseModel):
+    call_uuid: UUID
     start_stamp: datetime.datetime
     duration: str
     direction: str

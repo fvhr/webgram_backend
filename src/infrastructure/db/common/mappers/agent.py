@@ -22,6 +22,7 @@ class AgentGatewayDBMapper:
     @staticmethod
     def to_history_dto(model: Row) -> AgentHistoryDTO:
         return AgentHistoryDTO(
+            call_uuid=model.xml_cdr_uuid,
             start_stamp=model.start_stamp,
             duration=model.duration,
             direction=model.direction,
