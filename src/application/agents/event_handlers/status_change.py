@@ -4,10 +4,12 @@ from src.application.agents.ports.mappers import AgentDtoEntityMapperProtocol
 from src.application.agents.ports.repository import AgentRepositoryProtocol
 from src.application.common.dtos.event import EventDTO
 from src.application.common.event_handler import EventHandler
+from src.application.common.exceptions import UnknownError
 from src.application.common.ports.external import WebSocketManagerProtocol
 from src.application.common.ports.mapper import EventDtoEntityMapperProtocol
 from src.domain.enums import WebsocketMessageTypes, WebsocketRoles
 from src.domain.events.entities.base_event import EventTypes
+from src.logger import logger
 
 
 @dataclass
@@ -17,17 +19,21 @@ class AgentStatusChangeEventHandler(EventHandler):
     _event_mapper: EventDtoEntityMapperProtocol
     _ws_manager: WebSocketManagerProtocol
 
-    async def __call__(self, event: EventDTO):
+    async def __call__(self, event: EventDTO) -> None:
         custom_event = self._event_mapper.to_entity_custom(event)
         if custom_event.event_action == 'agent-status-change':
             if custom_event.event_agent_status and custom_event.event_agent_uuid:
-                agent = await self._agent_repository.change_status_agent(custom_event.event_agent_uuid,
-                                                                         custom_event.event_agent_status)
-                agent_dict = self._agent_mapper.to_dict(agent)
-                await self._ws_manager.personal_to_agent(WebsocketMessageTypes.AGENT_DATA, agent_dict,
-                                                         str(agent.agent_uuid))
-                await self._ws_manager.broadcast_message_to_role(WebsocketMessageTypes.AGENT_DATA, agent_dict,
-                                                                 WebsocketRoles.ADMIN)
+                try:
+                    agent = await self._agent_repository.change_status_agent(custom_event.event_agent_uuid,
+                                                                             custom_event.event_agent_status)
+                    agent_dict = self._agent_mapper.to_dict(agent)
+                    await self._ws_manager.personal_to_agent(WebsocketMessageTypes.AGENT_DATA, agent_dict,
+                                                             str(agent.agent_uuid))
+                    await self._ws_manager.broadcast_message_to_role(WebsocketMessageTypes.AGENT_DATA, agent_dict,
+                                                                     WebsocketRoles.ADMIN)
+                except Exception as e:
+                    logger.print_exception(f'Error: {e}')
+                    raise UnknownError(f'Error: {e}') from e
 
     @property
     def get_event_names(self) -> list:

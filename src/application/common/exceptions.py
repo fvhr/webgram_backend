@@ -12,3 +12,6 @@ class ForbiddenError(Exception):
 
 class FSAPIError(Exception):
     """Ошибки апи freeswitch"""
+
+class UnknownError(Exception):
+    """Ошибки"""
