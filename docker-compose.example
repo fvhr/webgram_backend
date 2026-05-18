@@ -1,0 +1,42 @@
+services:
+  api:
+    build: .
+    image: webgram-backend:1.0.1
+    container_name: webgram-backend
+    network_mode: "host"
+    environment:
+      PORT: 8000
+      PG_USER: "fusionpbx"
+      PG_PASS: "fusionpbx"
+      PG_HOST: "127.0.0.1"
+      PG_PORT: 5432
+      PG_NAME: "fusionpbx"
+      DEFAULT_ROLE: 'superadmin'
+      DEFAULT_ADMIN_NAME: ''
+      DEFAULT_ADMIN_PASSWORD: ''
+
+      FS_HOST: "localhost"
+      FS_PORT: 8021
+      FS_PASSWORD: ""
+
+      JWT_SECRET_KEY: ''
+      DEVELOP_MODE: 'dev'
+
+      FSAPI_URL: "http://localhost:8080/webapi"
+      FSAPI_USERNAME: "freeswitch"
+      FSAPI_PASSWORD: "works"
+
+      CORS_ORIGINS: ""
+
+      REDIS_HOST: "localhost"
+      REDIS_PORT: "6379"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/src
+      - /var/lib/freeswitch/recordings:/var/lib/freeswitch/recordings
+    logging:
+      driver: json-file
+      options:
+        tag: "webgram-backend"
+    restart: "always"
